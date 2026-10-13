@@ -12,7 +12,9 @@ foto_alt: Retrato
 
 Hola, soy **Javier Padrón**, soy ingeniero civil y apasionado de la vela. Mi trayectoria profesional está vinculada a la gestión de equipos, la dirección de operaciones y los proyectos de formación. Me gusta entender cómo funcionan las cosas y encontrar formas de mejorarlas, combinando experiencia, creatividad y tecnología.
 
-Hago estos proyectos por curiosidad, por aprender y por la satisfacción de convertir una idea en algo útil. Aquí comparto lo que voy creando y descubriendo por el camino.
+Algunos proyectos son útiles, otros son excusas para aprender, y la mayoría son las dos cosas.
+
+Comparto aquí lo que voy haciendo por si a alguien le sirve, le inspira o quiere mejorarlo.
 
 ## Vela
 
