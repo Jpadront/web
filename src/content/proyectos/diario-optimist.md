@@ -1,5 +1,5 @@
 ---
-titulo: Diario de vela de Álvaro
+titulo: Diario de Optimist
 resumen: Un cuaderno de a bordo para un regatista de Optimist. Horas en el agua, entrenamientos y regatas, viento y aparejo, con análisis por meses. Funciona sin conexión.
 fecha_inicio: 2026-09-01
 estado: en-desarrollo
@@ -10,7 +10,7 @@ portada_alt: El diario de vela en el ordenador, con las horas navegadas del año
 destacado: true
 enlaces:
   repositorio: ""
-  demo: https://diario-vela.jpadrontorrent.workers.dev/
+  demo: ""
   descarga: ""
 galeria:
   - imagen: ../../assets/imagenes/capturas/diario-movil.jpg
@@ -26,7 +26,7 @@ galeria:
 herramienta: ninguna
 ---
 
-Una aplicación sencilla para que Álvaro lleve su **cuaderno de vela de Optimist**: cada entrenamiento y cada regata, con lo que importa para ver cómo va la temporada.
+Una aplicación sencilla para llevar el **cuaderno de vela de un regatista de Optimist**: cada entrenamiento y cada regata, con lo que importa para ver cómo va la temporada.
 
 ## Qué guarda cada sesión
 
@@ -44,6 +44,6 @@ Una aplicación sencilla para que Álvaro lleve su **cuaderno de vela de Optimis
 
 ## Cómo está hecho
 
-Es una aplicación web que se instala en el móvil y **funciona sin conexión**: los datos se guardan en el propio dispositivo y, si se quiere, se sincronizan con Dropbox. Está publicada en Cloudflare y recuerda de vez en cuando hacer una copia de seguridad.
+Es una aplicación web que se instala en el móvil y **funciona sin conexión**: los datos se guardan en el propio dispositivo y, si se quiere, se sincronizan con Dropbox. Está publicada en Cloudflare, pero no la enlazo: es un diario personal. Recuerda de vez en cuando hacer una copia de seguridad.
 
-> Las capturas usan **datos de ejemplo**: el diario real vive en el móvil de Álvaro.
+> Las capturas usan **datos de ejemplo**: el diario real vive en el móvil de quien lo usa.
