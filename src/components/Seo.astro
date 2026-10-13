@@ -4,7 +4,7 @@
 // si la página no tiene portada se usa public/og-default.png.
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
-import sitio from '../data/sitio.json';
+import { sitio } from '../lib/sitio';
 
 interface Props {
   titulo: string;

@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import TarjetaProyecto from '../components/TarjetaProyecto.astro';
 import TarjetaEntrada from '../components/TarjetaEntrada.astro';
 import RedesSociales from '../components/RedesSociales.astro';
-import sitio from '../data/sitio.json';
+import { sitio } from '../lib/sitio';
 import { getEntradas, getProyectos } from '../lib/contenido';
 
 const proyectos = await getProyectos();

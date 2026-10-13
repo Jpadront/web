@@ -1,7 +1,7 @@
 // Feed RSS de la bitácora: /rss.xml
 import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
-import sitio from '../data/sitio.json';
+import { sitio } from '../lib/sitio';
 import { getEntradas } from '../lib/contenido';
 
 export async function GET(context: APIContext) {

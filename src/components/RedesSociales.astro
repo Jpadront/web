@@ -1,6 +1,6 @@
 ---
 // Enlaces de contacto a partir de src/data/sitio.json. Los campos vacíos no se muestran.
-import sitio from '../data/sitio.json';
+import { sitio } from '../lib/sitio';
 
 interface Props {
   conTexto?: boolean;
@@ -23,8 +23,8 @@ const redes = [
   c.github && { nombre: 'GitHub', href: c.github, icono: 'github', texto: 'GitHub' },
   c.instagram && { nombre: 'Instagram', href: c.instagram, icono: 'instagram', texto: 'Instagram' },
   c.linkedin && { nombre: 'LinkedIn', href: c.linkedin, icono: 'linkedin', texto: 'LinkedIn' },
-  ...(sitio.otras_redes as { nombre: string; url: string }[])
-    .filter((r) => r?.url)
+  ...sitio.otras_redes
+    .filter((r) => r.url)
     .map((r) => ({ nombre: r.nombre, href: r.url, icono: 'web', texto: r.nombre })),
 ].filter(Boolean) as { nombre: string; href: string; icono: string; texto: string }[];
 ---
