@@ -17,8 +17,8 @@ descripcion: >-
   Hago estos proyectos por curiosidad, por aprender y por la satisfacción de
   convertir una idea en algo útil. Aquí comparto lo que voy creando y
   descubriendo por el camino.
-foto: ../../assets/imagenes/retrato.jpg
-foto_alt: Retrato (imagen provisional)
+foto: ../../assets/imagenes/24e53497-61ad-4590-bfcc-c3383e95dae7.jpg
+foto_alt: Retrato
 ---
 > **Texto provisional**: edítalo desde Pages CMS («Sobre mí») o en `src/content/paginas/sobre-mi.md`.
 
