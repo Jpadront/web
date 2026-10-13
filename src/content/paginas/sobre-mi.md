@@ -4,10 +4,9 @@ descripcion: Quién soy, a qué me dedico y por qué hago estos proyectos.
 foto: ../../assets/imagenes/retrato.jpg
 foto_alt: Retrato (imagen provisional)
 ---
-
 > **Texto provisional**: edítalo desde Pages CMS («Sobre mí») o en `src/content/paginas/sobre-mi.md`.
 
-Hola, soy **[tu nombre]**. [Dos o tres frases sobre quién eres y a qué te dedicas.]
+Hola, soy **Javier Padrón**. [Dos o tres frases sobre quién eres y a qué te dedicas.]
 
 ## Vela
 
