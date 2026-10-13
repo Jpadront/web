@@ -1,0 +1,29 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import TarjetaEntrada from '../../../components/TarjetaEntrada.astro';
+import { contarEtiquetas, getEntradas, slugEtiqueta } from '../../../lib/contenido';
+
+// Una página por etiqueta usada en alguna entrada
+export const getStaticPaths = (async () => {
+  const entradas = await getEntradas();
+  return contarEtiquetas(entradas).map((t) => ({
+    params: { slug: t.slug },
+    props: {
+      nombre: t.nombre,
+      entradas: entradas.filter((e) => e.data.etiquetas.some((x) => slugEtiqueta(x) === t.slug)),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { nombre, entradas } = Astro.props;
+---
+
+<BaseLayout titulo={`#${nombre}`} descripcion={`Entradas de la bitácora con la etiqueta «${nombre}».`}>
+  <div class="contenedor seccion estrecho">
+    <p class="antetitulo"><a href="/bitacora/">Bitácora</a> · Etiqueta</p>
+    <h1>#{nombre}</h1>
+    <p class="texto-suave">{entradas.length} {entradas.length === 1 ? 'entrada' : 'entradas'}</p>
+    {entradas.map((e) => <TarjetaEntrada entrada={e} />)}
+  </div>
+</BaseLayout>

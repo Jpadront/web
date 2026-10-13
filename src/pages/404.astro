@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout titulo="Página no encontrada" descripcion="Esta página no existe." noIndexar>
+  <div class="contenedor seccion estrecho centro">
+    <p class="antetitulo">Error 404</p>
+    <h1>Fuera del recorrido</h1>
+    <p class="texto-suave">La página que buscas no existe o ha cambiado de sitio. Volvamos a la baliza de salida.</p>
+    <p class="acciones">
+      <a class="boton boton-primario" href="/">Ir al inicio</a>
+      <a class="boton" href="/proyectos/">Ver proyectos</a>
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .centro {
+    text-align: center;
+    margin-inline: auto;
+    padding-block: 5rem;
+  }
+  .acciones {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+</style>

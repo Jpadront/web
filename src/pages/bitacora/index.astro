@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TarjetaEntrada from '../../components/TarjetaEntrada.astro';
+import { contarEtiquetas, getEntradas } from '../../lib/contenido';
+
+const entradas = await getEntradas();
+const etiquetas = contarEtiquetas(entradas);
+
+// Agrupa por año para el listado cronológico
+const porAnio = Map.groupBy(entradas, (e) => e.data.fecha.getUTCFullYear());
+---
+
+<BaseLayout titulo="Bitácora" descripcion="Avances de los proyectos, crónicas de regatas y notas de lo que voy aprendiendo.">
+  <div class="contenedor seccion">
+    <p class="antetitulo">Bitácora</p>
+    <h1>Avances, crónicas y notas</h1>
+    <p class="texto-suave estrecho">
+      Todo lo que publico, del más reciente al más antiguo. También puedes seguirlo por <a href="/rss.xml">RSS</a>.
+    </p>
+
+    {
+      etiquetas.length > 0 && (
+        <nav class="nube" aria-label="Etiquetas">
+          {etiquetas.map((t) => (
+            <a class="chip" href={`/bitacora/etiqueta/${t.slug}/`}>
+              #{t.nombre} <span class="n">{t.total}</span>
+            </a>
+          ))}
+        </nav>
+      )
+    }
+
+    <div class="estrecho">
+      {
+        [...porAnio].map(([anio, lista]) => (
+          <section>
+            <h2 class="anio">{anio}</h2>
+            {lista.map((e) => (
+              <TarjetaEntrada entrada={e} />
+            ))}
+          </section>
+        ))
+      }
+      {entradas.length === 0 && <p>Todavía no hay entradas.</p>}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .nube {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 1.5rem 0 1rem;
+  }
+  .n {
+    opacity: 0.6;
+    font-weight: 500;
+  }
+  .anio {
+    margin: 2rem 0 0;
+    font-size: 1rem;
+    color: var(--acento-texto);
+    letter-spacing: 0.05em;
+  }
+</style>

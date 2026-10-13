@@ -1,0 +1,149 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Etiquetas from '../../components/Etiquetas.astro';
+import TarjetaEntrada from '../../components/TarjetaEntrada.astro';
+import TablaRegatas from '../../components/TablaRegatas.astro';
+import { CATEGORIAS, ESTADOS } from '../../lib/constantes';
+import { fechaISO, formatoMes, getEntradas, getProyectos, type Proyecto } from '../../lib/contenido';
+
+export const getStaticPaths = (async () => {
+  const proyectos = await getProyectos();
+  return proyectos.map((proyecto) => ({ params: { id: proyecto.id }, props: { proyecto } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  proyecto: Proyecto;
+}
+const { proyecto } = Astro.props;
+const d = proyecto.data;
+const { Content } = await render(proyecto);
+
+// Entradas de la bitácora vinculadas a este proyecto (campo «proyecto» de cada entrada)
+const relacionadas = (await getEntradas()).filter((e) => e.data.proyecto?.id === proyecto.id);
+const regatas = relacionadas.filter((e) => e.data.regata.nombre);
+
+const enlaces = [
+  d.enlaces.repositorio && { href: d.enlaces.repositorio, texto: 'Repositorio' },
+  d.enlaces.demo && { href: d.enlaces.demo, texto: 'Ver demo' },
+  d.enlaces.descarga && { href: d.enlaces.descarga, texto: 'Descargar' },
+].filter(Boolean) as { href: string; texto: string }[];
+---
+
+<BaseLayout titulo={d.titulo} descripcion={d.resumen} imagen={d.portada} tipo="article" fecha={d.fecha_inicio}>
+  <article class="contenedor seccion">
+    <header class="cabecera-proyecto">
+      <p class="antetitulo"><a href="/proyectos/">Proyectos</a> · {CATEGORIAS[d.categoria]}</p>
+      <h1>{d.titulo}</h1>
+      <p class="resumen">{d.resumen}</p>
+      <dl class="datos">
+        <div>
+          <dt>Estado</dt>
+          <dd class:list={['estado', `estado-${d.estado}`]}>{ESTADOS[d.estado]}</dd>
+        </div>
+        <div>
+          <dt>Desde</dt>
+          <dd><time datetime={fechaISO(d.fecha_inicio)}>{formatoMes(d.fecha_inicio)}</time></dd>
+        </div>
+        {
+          relacionadas.length > 0 && (
+            <div>
+              <dt>Entradas</dt>
+              <dd><a href="#entradas">{relacionadas.length}</a></dd>
+            </div>
+          )
+        }
+      </dl>
+      <Etiquetas etiquetas={d.etiquetas} enlazar={false} />
+      {
+        enlaces.length > 0 && (
+          <p class="enlaces">
+            {enlaces.map((e, i) => (
+              <a class:list={['boton', { 'boton-primario': i === 0 }]} href={e.href} rel={e.href.startsWith('http') ? 'noopener' : undefined}>
+                {e.texto}
+              </a>
+            ))}
+          </p>
+        )
+      }
+    </header>
+
+    {
+      d.portada && (
+        <Image
+          class="portada"
+          src={d.portada}
+          alt={d.portada_alt ?? ''}
+          widths={[640, 960, 1280, 1600]}
+          sizes="(max-width: 1000px) 100vw, 960px"
+          loading="eager"
+          fetchpriority="high"
+        />
+      )
+    }
+
+    <div class="prosa">
+      <Content />
+    </div>
+
+    {
+      relacionadas.length > 0 && (
+        <section id="entradas" class="relacionadas">
+          <h2>Entradas de este proyecto</h2>
+          {regatas.length > 0 && <TablaRegatas entradas={regatas} />}
+          <div class="estrecho">
+            {relacionadas.map((e) => (
+              <TarjetaEntrada entrada={e} sinProyecto />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .cabecera-proyecto {
+    max-width: var(--ancho-texto);
+  }
+  .resumen {
+    font-size: 1.15rem;
+    color: var(--texto-suave);
+  }
+  .datos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin: 1.25rem 0;
+  }
+  dt {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--texto-suave);
+  }
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+  .enlaces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+  }
+  .portada {
+    width: 100%;
+    max-width: 60rem;
+    border-radius: var(--radio);
+    margin: 2rem 0;
+  }
+  .relacionadas {
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--borde);
+  }
+</style>

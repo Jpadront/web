@@ -1,0 +1,47 @@
+---
+import { Image } from 'astro:assets';
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RedesSociales from '../components/RedesSociales.astro';
+
+// El contenido sale de src/content/paginas/sobre-mi.md (editable desde Pages CMS)
+const pagina = await getEntry('paginas', 'sobre-mi');
+if (!pagina) throw new Error('Falta src/content/paginas/sobre-mi.md');
+const { Content } = await render(pagina);
+const d = pagina.data;
+---
+
+<BaseLayout titulo={d.titulo} descripcion={d.descripcion} imagen={d.foto}>
+  <div class="contenedor seccion sobre-mi">
+    {d.foto && <Image class="foto" src={d.foto} alt={d.foto_alt ?? ''} width={320} height={320} densities={[1, 2]} loading="eager" />}
+    <div>
+      <h1>{d.titulo}</h1>
+      <div class="prosa">
+        <Content />
+      </div>
+      <RedesSociales conTexto />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .sobre-mi {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (min-width: 800px) {
+    .sobre-mi {
+      grid-template-columns: 16rem 1fr;
+      gap: 3rem;
+    }
+  }
+  .foto {
+    width: 100%;
+    max-width: 16rem;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid var(--acento);
+  }
+</style>

@@ -1,8 +1,91 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import TarjetaProyecto from '../components/TarjetaProyecto.astro';
+import TarjetaEntrada from '../components/TarjetaEntrada.astro';
+import RedesSociales from '../components/RedesSociales.astro';
 import sitio from '../data/sitio.json';
+import { getEntradas, getProyectos } from '../lib/contenido';
+
+const proyectos = await getProyectos();
+// Destacados: los marcados como «destacado»; si no hay ninguno, los más recientes
+const marcados = proyectos.filter((p) => p.data.destacado);
+const destacados = (marcados.length ? marcados : proyectos).slice(0, 4);
+const ultimas = (await getEntradas()).slice(0, 5);
 ---
 
 <BaseLayout titulo={sitio.titulo}>
-  <div class="contenedor seccion"><h1>{sitio.nombre}</h1><p>{sitio.presentacion}</p></div>
+  <section class="portada">
+    <div class="contenedor">
+      <p class="antetitulo">Proyectos · Vela · Software · Impresión 3D</p>
+      <h1>{sitio.nombre}</h1>
+      <p class="presentacion">{sitio.presentacion}</p>
+      <div class="acciones">
+        <a class="boton boton-primario" href="/proyectos/">Ver proyectos</a>
+        <a class="boton" href="/bitacora/">Leer la bitácora</a>
+      </div>
+      <RedesSociales />
+    </div>
+  </section>
+
+  <section class="contenedor seccion">
+    <div class="titulo-seccion">
+      <h2>Proyectos destacados</h2>
+      <a href="/proyectos/">Todos los proyectos →</a>
+    </div>
+    <div class="rejilla destacados">
+      {destacados.map((p, i) => <TarjetaProyecto proyecto={p} prioridad={i < 2} />)}
+    </div>
+  </section>
+
+  <section class="contenedor seccion">
+    <div class="titulo-seccion">
+      <h2>Últimas entradas</h2>
+      <a href="/bitacora/">Toda la bitácora →</a>
+    </div>
+    <div class="estrecho">
+      {ultimas.length ? ultimas.map((e) => <TarjetaEntrada entrada={e} />) : <p class="texto-suave">Todavía no hay entradas.</p>}
+    </div>
+  </section>
 </BaseLayout>
+
+<style>
+  .portada {
+    padding-block: clamp(3rem, 8vw, 6rem) clamp(2rem, 5vw, 3.5rem);
+    background:
+      radial-gradient(60rem 30rem at 85% -10%, color-mix(in srgb, var(--acento) 14%, transparent), transparent 60%),
+      linear-gradient(180deg, var(--superficie), var(--fondo));
+    border-bottom: 1px solid var(--borde);
+  }
+  .presentacion {
+    max-width: 40rem;
+    font-size: clamp(1.05rem, 1rem + 0.4vw, 1.25rem);
+    color: var(--texto-suave);
+  }
+  .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+  }
+  /* Destacados en 2 columnas en escritorio (4 proyectos → rejilla 2×2) */
+  @media (min-width: 900px) {
+    .destacados {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .titulo-seccion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .titulo-seccion h2 {
+    margin: 0;
+  }
+  .titulo-seccion a {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+</style>

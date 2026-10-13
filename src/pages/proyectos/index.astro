@@ -1,0 +1,141 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TarjetaProyecto from '../../components/TarjetaProyecto.astro';
+import { CATEGORIAS, ESTADOS } from '../../lib/constantes';
+import { getProyectos } from '../../lib/contenido';
+
+const proyectos = await getProyectos();
+
+// Solo se ofrecen como filtro las categorías y estados que tienen algún proyecto
+const usadas = <T extends string>(clave: 'categoria' | 'estado', todas: Record<T, string>) =>
+  (Object.entries(todas) as [T, string][]).filter(([k]) => proyectos.some((p) => p.data[clave] === k));
+const categorias = usadas('categoria', CATEGORIAS);
+const estados = usadas('estado', ESTADOS);
+---
+
+<BaseLayout titulo="Proyectos" descripcion="Todos mis proyectos: software, vela, impresión 3D y otros, con su estado actual.">
+  <div class="contenedor seccion">
+    <p class="antetitulo">Proyectos</p>
+    <h1>Lo que estoy construyendo</h1>
+
+    <!-- Filtros: funcionan en el navegador (sin recargar) y se guardan en la URL (?categoria=vela&estado=terminado) -->
+    <form class="filtros" aria-label="Filtrar proyectos" data-filtros>
+      <fieldset>
+        <legend>Categoría</legend>
+        <label><input type="radio" name="categoria" value="" checked /> Todas</label>
+        {categorias.map(([k, v]) => <label><input type="radio" name="categoria" value={k} /> {v}</label>)}
+      </fieldset>
+      <fieldset>
+        <legend>Estado</legend>
+        <label><input type="radio" name="estado" value="" checked /> Todos</label>
+        {estados.map(([k, v]) => <label><input type="radio" name="estado" value={k} /> {v}</label>)}
+      </fieldset>
+    </form>
+
+    <p class="contador texto-suave" aria-live="polite" data-contador>{proyectos.length} proyectos</p>
+
+    <div class="rejilla" data-lista>
+      {proyectos.map((p, i) => <TarjetaProyecto proyecto={p} prioridad={i < 3} />)}
+    </div>
+    <p class="vacio texto-suave" data-vacio hidden>No hay proyectos con esos filtros.</p>
+  </div>
+</BaseLayout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-filtros]')!;
+  const tarjetas = [...document.querySelectorAll<HTMLElement>('[data-lista] > [data-categoria]')];
+  const contador = document.querySelector<HTMLElement>('[data-contador]')!;
+  const vacio = document.querySelector<HTMLElement>('[data-vacio]')!;
+
+  function aplicar() {
+    const datos = new FormData(form);
+    const categoria = String(datos.get('categoria') ?? '');
+    const estado = String(datos.get('estado') ?? '');
+    let visibles = 0;
+    for (const t of tarjetas) {
+      const ok = (!categoria || t.dataset.categoria === categoria) && (!estado || t.dataset.estado === estado);
+      t.hidden = !ok;
+      if (ok) visibles++;
+    }
+    contador.textContent = `${visibles} ${visibles === 1 ? 'proyecto' : 'proyectos'}`;
+    vacio.hidden = visibles > 0;
+    // Guarda el filtro en la URL para poder compartir el enlace filtrado
+    const url = new URL(location.href);
+    categoria ? url.searchParams.set('categoria', categoria) : url.searchParams.delete('categoria');
+    estado ? url.searchParams.set('estado', estado) : url.searchParams.delete('estado');
+    history.replaceState(null, '', url);
+  }
+
+  // Al cargar, aplica los filtros que vengan en la URL
+  const params = new URLSearchParams(location.search);
+  for (const nombre of ['categoria', 'estado']) {
+    const valor = params.get(nombre);
+    const input = valor && form.querySelector<HTMLInputElement>(`input[name="${nombre}"][value="${CSS.escape(valor)}"]`);
+    if (input) input.checked = true;
+  }
+  form.addEventListener('change', aplicar);
+  aplicar();
+</script>
+
+<style>
+  .filtros {
+    display: grid;
+    gap: 0.75rem;
+    margin: 1.5rem 0 0.5rem;
+  }
+  fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+  }
+  legend {
+    float: left;
+    width: 5.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--texto-suave);
+  }
+  /* Los radio se ven como botones-chip */
+  label {
+    cursor: pointer;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid var(--borde);
+    font-size: 0.9rem;
+    font-weight: 600;
+    background: var(--fondo);
+  }
+  label:hover {
+    border-color: var(--acento);
+  }
+  label:has(input:checked) {
+    background: var(--marino);
+    border-color: var(--marino);
+    color: #fff;
+  }
+  label:has(input:focus-visible) {
+    outline: 3px solid var(--acento);
+    outline-offset: 2px;
+  }
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .contador {
+    font-size: 0.9rem;
+    margin: 1rem 0;
+  }
+  @media (max-width: 560px) {
+    legend {
+      width: 100%;
+      margin-bottom: 0.2rem;
+    }
+  }
+</style>

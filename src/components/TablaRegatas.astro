@@ -1,0 +1,67 @@
+---
+// Tabla resumen del Diario de regatas: una fila por crónica con datos de regata
+import { fechaISO, formatoFecha, type Entrada } from '../lib/contenido';
+
+interface Props {
+  entradas: Entrada[];
+}
+const { entradas } = Astro.props;
+---
+
+<div class="tabla-envoltorio">
+  <table>
+    <caption class="solo-lectores">Resultados de las regatas</caption>
+    <thead>
+      <tr>
+        <th scope="col">Fecha</th>
+        <th scope="col">Regata</th>
+        <th scope="col">Clase</th>
+        <th scope="col" class="num">Posición</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        entradas.map((e) => {
+          const r = e.data.regata;
+          return (
+            <tr>
+              <td><time datetime={fechaISO(e.data.fecha)}>{formatoFecha(e.data.fecha)}</time></td>
+              <td><a href={`/bitacora/${e.id}/`}>{r.nombre}</a></td>
+              <td>{r.clase ?? '—'}</td>
+              <td class="num">
+                {r.posicion ? <strong>{r.posicion}.º</strong> : '—'}
+                {r.posicion && r.participantes && <span class="texto-suave"> / {r.participantes}</span>}
+              </td>
+            </tr>
+          );
+        })
+      }
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .tabla-envoltorio {
+    overflow-x: auto;
+    margin: 1rem 0 1.5rem;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+  }
+  table {
+    min-width: 32rem;
+  }
+  th,
+  td {
+    padding: 0.6rem 0.9rem;
+  }
+  thead {
+    background: var(--superficie);
+  }
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .num {
+    text-align: right;
+    white-space: nowrap;
+  }
+</style>

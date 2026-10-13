@@ -1,0 +1,86 @@
+---
+import { getEntry } from 'astro:content';
+import { fechaISO, formatoFecha, textoPosicion, type Entrada } from '../lib/contenido';
+
+interface Props {
+  entrada: Entrada;
+  /** Oculta el nombre del proyecto (útil dentro de la propia página del proyecto) */
+  sinProyecto?: boolean;
+}
+const { entrada, sinProyecto = false } = Astro.props;
+const d = entrada.data;
+const proyecto = !sinProyecto && d.proyecto ? await getEntry(d.proyecto) : undefined;
+const posicion = textoPosicion(d.regata.posicion, d.regata.participantes);
+---
+
+<article class="entrada">
+  <p class="meta">
+    <time datetime={fechaISO(d.fecha)}>{formatoFecha(d.fecha)}</time>
+    {proyecto && <span>· {proyecto.data.titulo}</span>}
+    {d.borrador && <span class="chip">Borrador</span>}
+  </p>
+  <h3><a href={`/bitacora/${entrada.id}/`}>{d.titulo}</a></h3>
+  {
+    d.regata.nombre && (
+      <p class="regata">
+        <span>⛵ {d.regata.nombre}</span>
+        {posicion && <strong class="posicion">{posicion}</strong>}
+      </p>
+    )
+  }
+  <p class="resumen">{d.resumen}</p>
+</article>
+
+<style>
+  .entrada {
+    position: relative;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--borde);
+  }
+  .meta {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+  }
+  h3 {
+    margin: 0.2rem 0 0.35rem;
+    font-size: 1.15rem;
+  }
+  h3 a {
+    color: var(--texto);
+    text-decoration: none;
+  }
+  h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  h3 a:hover {
+    color: var(--acento-texto);
+  }
+  .regata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+    margin: 0 0 0.35rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+  .posicion {
+    background: var(--marino);
+    color: #fff;
+    padding: 0.05rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+  }
+  .resumen {
+    margin: 0;
+    color: var(--texto-suave);
+    font-size: 0.95rem;
+  }
+</style>
