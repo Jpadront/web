@@ -1,0 +1,15 @@
+{
+  "nombre": "Tu Nombre",
+  "titulo": "Tu Nombre · Proyectos",
+  "descripcion": "Proyectos de software, vela y impresión 3D: lo que construyo, cómo lo hago y lo que aprendo por el camino.",
+  "presentacion": "Hola, soy [tu nombre]. [A qué te dedicas, en una frase]. Navego como tripulante del Macaco en regatas ORC y en mis ratos libres construyo herramientas, imprimo piezas y escribo sobre ello. Aquí comparto los proyectos y lo que voy aprendiendo.",
+  "url": "https://tu-web.pages.dev",
+  "idioma": "es-ES",
+  "contacto": {
+    "email": "tu@email.com",
+    "github": "https://github.com/jpadront",
+    "instagram": "",
+    "linkedin": ""
+  },
+  "otras_redes": []
+}

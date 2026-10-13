@@ -1,0 +1,41 @@
+---
+import sitio from '../data/sitio.json';
+import RedesSociales from './RedesSociales.astro';
+const anio = new Date().getFullYear();
+---
+
+<footer class="pie">
+  <div class="contenedor fila">
+    <p>© {anio} {sitio.nombre}</p>
+    <RedesSociales />
+    <p class="enlaces">
+      <a href="/rss.xml">RSS</a>
+      <a href="/calculadora-orc/">Calculadora ORC</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .pie {
+    margin-top: 4rem;
+    border-top: 1px solid var(--borde);
+    background: var(--superficie);
+    font-size: 0.9rem;
+    color: var(--texto-suave);
+  }
+  .fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 1.75rem;
+  }
+  p {
+    margin: 0;
+  }
+  .enlaces {
+    display: flex;
+    gap: 1rem;
+  }
+</style>

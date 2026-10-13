@@ -1,0 +1,74 @@
+---
+// Enlaces de contacto a partir de src/data/sitio.json. Los campos vacíos no se muestran.
+import sitio from '../data/sitio.json';
+
+interface Props {
+  conTexto?: boolean;
+}
+const { conTexto = false } = Astro.props;
+
+// Iconos SVG en línea (sin dependencias externas)
+const iconos: Record<string, string> = {
+  email: '<path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/>',
+  github:
+    '<path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/>',
+  instagram: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5"/>',
+  linkedin: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 10v7M8 7v.01M12 17v-4a2 2 0 0 1 4 0v4M12 10v7"/>',
+  web: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+};
+
+const c = sitio.contacto;
+const redes = [
+  c.email && { nombre: 'Email', href: `mailto:${c.email}`, icono: 'email', texto: c.email },
+  c.github && { nombre: 'GitHub', href: c.github, icono: 'github', texto: 'GitHub' },
+  c.instagram && { nombre: 'Instagram', href: c.instagram, icono: 'instagram', texto: 'Instagram' },
+  c.linkedin && { nombre: 'LinkedIn', href: c.linkedin, icono: 'linkedin', texto: 'LinkedIn' },
+  ...(sitio.otras_redes as { nombre: string; url: string }[])
+    .filter((r) => r?.url)
+    .map((r) => ({ nombre: r.nombre, href: r.url, icono: 'web', texto: r.nombre })),
+].filter(Boolean) as { nombre: string; href: string; icono: string; texto: string }[];
+---
+
+<ul class:list={['redes', { 'con-texto': conTexto }]}>
+  {
+    redes.map((r) => (
+      <li>
+        <a href={r.href} rel="me noopener" aria-label={r.nombre} title={r.nombre}>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={iconos[r.icono]} />
+          {conTexto && <span>{r.texto}</span>}
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .redes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem;
+    border-radius: 999px;
+    border: 1px solid var(--borde);
+    color: var(--texto);
+    text-decoration: none;
+    background: var(--fondo);
+  }
+  .con-texto a {
+    padding: 0.45rem 0.9rem 0.45rem 0.6rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  a:hover {
+    border-color: var(--acento);
+    color: var(--acento-texto);
+  }
+</style>

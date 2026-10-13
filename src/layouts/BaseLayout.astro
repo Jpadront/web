@@ -1,0 +1,61 @@
+---
+import type { ImageMetadata } from 'astro';
+import '../styles/global.css';
+import Seo from '../components/Seo.astro';
+import Cabecera from '../components/Cabecera.astro';
+import Pie from '../components/Pie.astro';
+import sitio from '../data/sitio.json';
+
+interface Props {
+  titulo: string;
+  descripcion?: string;
+  imagen?: ImageMetadata;
+  tipo?: 'website' | 'article';
+  fecha?: Date;
+  noIndexar?: boolean;
+}
+const { descripcion = sitio.descripcion, ...resto } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Aplica el tema guardado antes de pintar la página (evita el parpadeo claro→oscuro) -->
+    <script is:inline>
+      try {
+        const t = localStorage.getItem('tema');
+        if (t === 'claro' || t === 'oscuro') document.documentElement.dataset.tema = t;
+      } catch {}
+    </script>
+    <meta name="theme-color" content="#0b2545" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${sitio.nombre} · Bitácora`} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="generator" content={Astro.generator} />
+    <Seo descripcion={descripcion} {...resto} />
+  </head>
+  <body>
+    <a class="saltar solo-lectores" href="#contenido">Saltar al contenido</a>
+    <Cabecera />
+    <main id="contenido">
+      <slot />
+    </main>
+    <Pie />
+  </body>
+</html>
+
+<style>
+  .saltar:focus {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    width: auto;
+    height: auto;
+    clip: auto;
+    padding: 0.5rem 1rem;
+    background: var(--fondo);
+    z-index: 100;
+  }
+</style>

@@ -1,0 +1,11 @@
+# Dependencias y salida de compilación
+node_modules/
+dist/
+.astro/
+
+# Entorno y sistema
+.env
+.env.*
+.DS_Store
+*.log
+.wrangler/

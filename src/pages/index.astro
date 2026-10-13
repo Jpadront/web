@@ -1,0 +1,8 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import sitio from '../data/sitio.json';
+---
+
+<BaseLayout titulo={sitio.titulo}>
+  <div class="contenedor seccion"><h1>{sitio.nombre}</h1><p>{sitio.presentacion}</p></div>
+</BaseLayout>
