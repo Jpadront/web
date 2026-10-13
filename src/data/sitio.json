@@ -1,12 +1,11 @@
 {
   "nombre": "Javier Padrón",
   "titulo": "Javier Padrón · Proyectos",
-  "descripcion": "Proyectos de software, vela y impresión 3D: lo que construyo, cómo lo hago y lo que aprendo por el camino.",
-  "presentacion": "Hola, soy Javier Padrón. [A qué te dedicas, en una frase]. Navego como tripulante del Macaco en regatas ORC y en mis ratos libres construyo herramientas, imprimo piezas y escribo sobre ello. Aquí comparto los proyectos y lo que voy aprendiendo.",
+  "descripcion": "Proyectos de software, vela e impresión 3D, lo que construyo, cómo lo hago y lo que aprendo por el camino.",
+  "presentacion": "Soy ingeniero y apasionado de la vela y la tecnología. Creo aplicaciones, herramientas y diseños 3D para resolver necesidades reales. Aquí comparto mis proyectos y lo que aprendo por el camino.",
   "url": "https://webjp-8ss.pages.dev",
   "idioma": "es-ES",
   "contacto": {
-    "email": "tu@email.com",
     "github": "https://github.com/jpadront",
     "instagram": "https://www.instagram.com/lpasplicing/",
     "linkedin": "https://www.linkedin.com/in/javierpadrontorrent/"
