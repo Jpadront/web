@@ -22,7 +22,7 @@ Me atrae esa mezcla de técnica, estrategia y trabajo en equipo que hace que nun
 
 ## Lo que construyo
 
-Me gusta convertir las ideas en cosas que se puedan utilizar: **herramientas de software, aplicaciones y piezas impresas en 3D**. Muchos de estos proyectos nacen de una necesidad a bordo, de algo que podría funcionar mejor o, simplemente, de la curiosidad por probar.
+Me gusta convertir las ideas en cosas que se puedan utilizar, **herramientas de software, aplicaciones y piezas impresas en 3D**. Muchos de estos proyectos nacen de una necesidad a bordo, de algo que podría funcionar mejor o, simplemente, de la curiosidad por probar.
 
 Entre ellos está **FastTack**, una herramienta de análisis de navegación que desarrollo con ayuda de Claude Code, además de soportes, accesorios y soluciones para distintos barcos. La inteligencia artificial me ayuda a llevar estas ideas a la práctica mientras aprendo durante el proceso.
 
