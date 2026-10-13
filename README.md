@@ -222,4 +222,4 @@ Todas las fórmulas, los límites y los datos de ejemplo (inventados) están com
 - [ ] Los cuatro proyectos de `src/content/proyectos/`: quitar los textos entre corchetes `[…]` y los avisos de «Texto provisional».
 - [ ] Las entradas de ejemplo de `src/content/entradas/`: editarlas o borrarlas.
 - [ ] Sustituir las imágenes de ejemplo de `src/assets/imagenes/` y `public/og-default.png` (imagen al compartir en redes, 1200×630).
-- [ ] `public/descargas/cubo-calibracion.stl` es un archivo de prueba: bórralo cuando subas los tuyos.
+- [ ] Sube tus STL/3MF a `public/descargas/` (o desde la biblioteca «Descargas» de Pages CMS).
