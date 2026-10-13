@@ -6,7 +6,7 @@ estado: en-desarrollo
 categoria: vela
 etiquetas: [orc, regatas, macaco, táctica]
 portada: ../../assets/imagenes/diario-regatas-portada.jpg
-portada_alt: Ilustración de un velero con spinnaker naranja
+portada_alt: Ilustración de un recorrido barlovento-sotavento con la línea de salida y varios barcos
 destacado: true
 enlaces:
   repositorio: ""

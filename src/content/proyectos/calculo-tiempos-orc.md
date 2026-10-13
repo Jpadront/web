@@ -6,7 +6,7 @@ estado: en-desarrollo
 categoria: vela
 etiquetas: [orc, calculadora, compensación]
 portada: ../../assets/imagenes/calculo-orc-portada.jpg
-portada_alt: Ilustración de un cronómetro
+portada_alt: Ilustración de un diagrama polar de velocidades y una tabla de coeficientes
 destacado: true
 enlaces:
   repositorio: ""

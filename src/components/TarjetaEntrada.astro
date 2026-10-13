@@ -1,6 +1,7 @@
 ---
+// Una fila de la bitácora: fecha a la izquierda (como en un cuaderno) y el resto a la derecha
 import { getEntry } from 'astro:content';
-import { fechaISO, formatoFecha, textoPosicion, type Entrada } from '../lib/contenido';
+import { fechaISO, formatoFechaCorta, textoPosicion, type Entrada } from '../lib/contenido';
 
 interface Props {
   entrada: Entrada;
@@ -14,73 +15,80 @@ const posicion = textoPosicion(d.regata.posicion, d.regata.participantes);
 ---
 
 <article class="entrada">
-  <p class="meta">
-    <time datetime={fechaISO(d.fecha)}>{formatoFecha(d.fecha)}</time>
-    {proyecto && <span>· {proyecto.data.titulo}</span>}
-    {d.borrador && <span class="chip">Borrador</span>}
-  </p>
-  <h3><a href={`/bitacora/${entrada.id}/`}>{d.titulo}</a></h3>
-  {
-    d.regata.nombre && (
-      <p class="regata">
-        <span>⛵ {d.regata.nombre}</span>
-        {posicion && <strong class="posicion">{posicion}</strong>}
-      </p>
-    )
-  }
-  <p class="resumen">{d.resumen}</p>
+  <time class="fecha mono" datetime={fechaISO(d.fecha)}>{formatoFechaCorta(d.fecha)}</time>
+  <div class="cuerpo">
+    <h3><a href={`/bitacora/${entrada.id}/`}>{d.titulo}</a></h3>
+    <p class="resumen">{d.resumen}</p>
+    {
+      (proyecto || d.regata.nombre || d.borrador) && (
+        <p class="meta etiqueta">
+          {proyecto && <span>{proyecto.data.titulo}</span>}
+          {d.regata.nombre && <span>{d.regata.nombre}</span>}
+          {posicion && <span class="posicion">{posicion}</span>}
+          {d.borrador && <span class="posicion">Borrador</span>}
+        </p>
+      )
+    }
+  </div>
 </article>
 
 <style>
   .entrada {
     position: relative;
-    padding: 1.1rem 0;
-    border-bottom: 1px solid var(--borde);
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: var(--e-1) var(--e-6);
+    padding: var(--e-6) 0;
+    border-bottom: 1px solid var(--linea);
   }
-  .meta {
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--texto-suave);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    align-items: center;
+  .entrada:first-child {
+    padding-top: 0;
+  }
+  .fecha {
+    padding-top: 0.42rem;
+    font-size: 0.78rem;
+    color: var(--tinta-3);
+    letter-spacing: 0.02em;
   }
   h3 {
-    margin: 0.2rem 0 0.35rem;
-    font-size: 1.15rem;
+    margin: 0 0 var(--e-1);
+    font-size: 1.35rem;
+    line-height: 1.25;
   }
   h3 a {
-    color: var(--texto);
+    color: var(--tinta);
     text-decoration: none;
+    transition: color var(--transicion);
   }
   h3 a::after {
     content: '';
     position: absolute;
     inset: 0;
   }
-  h3 a:hover {
+  .entrada:hover h3 a {
     color: var(--acento-texto);
-  }
-  .regata {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    align-items: center;
-    margin: 0 0 0.35rem;
-    font-size: 0.92rem;
-    font-weight: 600;
-  }
-  .posicion {
-    background: var(--marino);
-    color: #fff;
-    padding: 0.05rem 0.55rem;
-    border-radius: 999px;
-    font-size: 0.82rem;
   }
   .resumen {
     margin: 0;
-    color: var(--texto-suave);
-    font-size: 0.95rem;
+    color: var(--tinta-2);
+    font-size: 0.97rem;
+    line-height: 1.6;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1rem;
+    margin: var(--e-3) 0 0;
+  }
+  .posicion {
+    color: var(--acento-texto);
+  }
+  @media (max-width: 600px) {
+    .entrada {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .fecha {
+      padding-top: 0;
+    }
   }
 </style>

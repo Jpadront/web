@@ -18,4 +18,4 @@ Me gusta hacer cosas: herramientas de software (ahora mismo **FastTack**, con Cl
 
 ## Contacto
 
-Puedes escribirme por cualquiera de los enlaces de abajo.
+Puedes escribirme por cualquiera de los enlaces de contacto.

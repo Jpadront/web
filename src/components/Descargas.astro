@@ -22,7 +22,7 @@ const url = (ruta: string) => (/^(https?:)?\/\//.test(ruta) || ruta.startsWith('
               <span class="ext">{extension(a.archivo)}</span>
               <span class="texto">
                 <strong>{a.nombre ?? nombreArchivo(a.archivo)}</strong>
-                <span class="texto-suave">{nombreArchivo(a.archivo)}</span>
+                <span>{nombreArchivo(a.archivo)}</span>
               </span>
               <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" />
@@ -37,52 +37,69 @@ const url = (ruta: string) => (/^(https?:)?\/\//.test(ruta) || ruta.startsWith('
 
 <style>
   .descargas {
-    margin: 2.5rem 0;
-    max-width: var(--ancho-texto);
+    margin: var(--e-16) 0;
+    max-width: 52rem;
+  }
+  h2 {
+    margin: 0 0 var(--e-2);
   }
   ul {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: grid;
-    gap: 0.5rem;
+    border-top: 1px solid var(--tinta);
   }
   a {
     display: flex;
     align-items: center;
-    gap: 0.9rem;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--borde);
-    border-radius: var(--radio);
-    color: var(--texto);
+    gap: var(--e-4);
+    padding: var(--e-4) 0;
+    border-bottom: 1px solid var(--linea);
+    color: var(--tinta);
     text-decoration: none;
-    background: var(--fondo);
   }
-  a:hover {
-    border-color: var(--acento);
+  a:hover strong {
+    color: var(--acento-texto);
   }
   .ext {
     flex: none;
-    display: grid;
-    place-items: center;
-    width: 3rem;
-    height: 3rem;
-    border-radius: 10px;
-    background: var(--marino);
-    color: #fff;
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
+    min-width: 3.25rem;
+    padding: 0.3rem 0.4rem;
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radio-pequeno);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-align: center;
+    color: var(--tinta-2);
   }
   .texto {
     flex: 1;
     display: grid;
     min-width: 0;
   }
+  strong {
+    font-weight: 550;
+    transition: color var(--transicion);
+  }
   .texto span {
-    font-size: 0.85rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--tinta-3);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  svg {
+    flex: none;
+    color: var(--tinta-3);
+    transition:
+      transform var(--transicion),
+      color var(--transicion);
+  }
+  a:hover svg {
+    color: var(--acento-texto);
+    transform: translateY(2px);
   }
 </style>

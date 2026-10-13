@@ -6,7 +6,7 @@ estado: en-desarrollo
 categoria: 3d
 etiquetas: [impresión 3d, stl, diseño]
 portada: ../../assets/imagenes/impresiones-3d-portada.jpg
-portada_alt: Ilustración de un cubo en perspectiva
+portada_alt: Ilustración isométrica de una pieza imprimiéndose capa a capa
 destacado: true
 enlaces:
   repositorio: ""

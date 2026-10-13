@@ -1,6 +1,7 @@
 ---
 import { sitio } from '../lib/sitio';
 import BotonTema from './BotonTema.astro';
+import Gallardete from './Gallardete.astro';
 
 const enlaces = [
   { href: '/proyectos/', texto: 'Proyectos' },
@@ -9,13 +10,13 @@ const enlaces = [
 ];
 // Marca como activa la sección en la que estamos (también en sus subpáginas)
 const ruta = Astro.url.pathname;
-const activo = (href: string) => ruta === href || ruta.startsWith(href);
+const activo = (href: string) => ruta.startsWith(href);
 ---
 
 <header class="cabecera">
   <div class="contenedor fila">
     <a class="marca" href="/" aria-label={`${sitio.nombre}, inicio`}>
-      <img src="/favicon.svg" alt="" width="32" height="32" />
+      <Gallardete />
       <span>{sitio.nombre}</span>
     </a>
     <nav aria-label="Principal">
@@ -40,63 +41,86 @@ const activo = (href: string) => ruta === href || ruta.startsWith(href);
     position: sticky;
     top: 0;
     z-index: 10;
-    background: color-mix(in srgb, var(--fondo) 88%, transparent);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--borde);
+    background: color-mix(in srgb, var(--fondo) 85%, transparent);
+    backdrop-filter: saturate(1.4) blur(12px);
+    -webkit-backdrop-filter: saturate(1.4) blur(12px);
+    border-bottom: 1px solid var(--linea);
   }
   .fila {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    min-height: 4rem;
-    flex-wrap: wrap;
+    gap: var(--e-4);
+    min-height: 3.75rem;
   }
   .marca {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-    color: var(--texto);
-    text-decoration: none;
+    gap: 0.55rem;
     margin-right: auto;
+    color: var(--tinta);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.98rem;
+    letter-spacing: -0.01em;
   }
-  nav ul {
+  .marca :global(.gallardete) {
+    transition: transform 400ms cubic-bezier(0.3, 1.5, 0.5, 1);
+    transform-origin: 20% 50%;
+  }
+  /* Detalle: el gallardete «ondea» un poco al pasar el ratón */
+  .marca:hover :global(.gallardete) {
+    transform: skewY(-6deg);
+  }
+  ul {
     display: flex;
-    gap: 0.25rem;
+    gap: var(--e-6);
     list-style: none;
     margin: 0;
     padding: 0;
   }
   nav a {
+    position: relative;
     display: block;
-    padding: 0.4rem 0.7rem;
-    border-radius: 999px;
-    color: var(--texto-suave);
+    padding-block: 0.4rem;
+    color: var(--tinta-2);
     text-decoration: none;
-    font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
+    font-weight: 500;
   }
   nav a:hover {
-    color: var(--texto);
-    background: var(--superficie);
+    color: var(--tinta);
   }
   nav a[aria-current='page'] {
-    color: var(--texto);
-    box-shadow: inset 0 -2px 0 var(--acento);
-    border-radius: 0;
+    color: var(--tinta);
   }
-  /* En móvil la navegación baja a una segunda línea, ocupando todo el ancho */
+  /* Indicador de sección actual: un trazo fino de acento bajo el enlace */
+  nav a[aria-current='page']::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.05rem;
+    height: 1.5px;
+    background: var(--acento);
+  }
+  /* En móvil: nombre y botón de tema arriba, navegación en una segunda línea */
   @media (max-width: 560px) {
-    .marca span {
-      font-size: 0.95rem;
+    .fila {
+      flex-wrap: wrap;
+      row-gap: 0;
+      padding-top: var(--e-2);
     }
     nav {
       order: 3;
       width: 100%;
-      margin-inline: -0.7rem;
-      padding-bottom: 0.4rem;
+      border-top: 1px solid var(--linea);
+      margin-top: var(--e-2);
+    }
+    ul {
+      gap: var(--e-6);
+    }
+    nav a {
+      padding-block: 0.55rem;
     }
   }
 </style>

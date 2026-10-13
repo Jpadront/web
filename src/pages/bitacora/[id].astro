@@ -5,7 +5,7 @@ import { getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Etiquetas from '../../components/Etiquetas.astro';
 import FichaRegata from '../../components/FichaRegata.astro';
-import { fechaISO, formatoFecha, getEntradas, type Entrada } from '../../lib/contenido';
+import { fechaISO, formatoFecha, getEntradas, minutosLectura, type Entrada } from '../../lib/contenido';
 
 export const getStaticPaths = (async () => {
   const entradas = await getEntradas();
@@ -25,33 +25,38 @@ const { entrada, anterior, posterior } = Astro.props;
 const d = entrada.data;
 const proyecto = d.proyecto ? await getEntry(d.proyecto) : undefined;
 const { Content } = await render(entrada);
+const minutos = minutosLectura(entrada.body);
 ---
 
 <BaseLayout titulo={d.titulo} descripcion={d.resumen} imagen={d.portada} tipo="article" fecha={d.fecha}>
   <article class="contenedor seccion">
-    <header class="estrecho">
-      <p class="antetitulo">
+    <header class="cabecera-entrada">
+      <p class="etiqueta">
         <a href="/bitacora/">Bitácora</a>
-        {proyecto && <> · <a href={`/proyectos/${proyecto.id}/`}>{proyecto.data.titulo}</a></>}
+        {proyecto && <> / <a href={`/proyectos/${proyecto.id}/`}>{proyecto.data.titulo}</a></>}
       </p>
       <h1>{d.titulo}</h1>
-      <p class="texto-suave"><time datetime={fechaISO(d.fecha)}>{formatoFecha(d.fecha)}</time></p>
-      <Etiquetas etiquetas={d.etiquetas} />
+      <p class="entradilla">{d.resumen}</p>
+      <p class="meta etiqueta">
+        <time datetime={fechaISO(d.fecha)}>{formatoFecha(d.fecha)}</time>
+        <span>{minutos} min de lectura</span>
+      </p>
     </header>
 
-    {d.regata.nombre && <div class="estrecho"><FichaRegata regata={d.regata} /></div>}
+    {d.regata.nombre && <FichaRegata regata={d.regata} />}
 
     {
       d.portada && (
-        <Image
-          class="portada"
-          src={d.portada}
-          alt={d.portada_alt ?? ''}
-          widths={[640, 960, 1280, 1600]}
-          sizes="(max-width: 1000px) 100vw, 960px"
-          loading="eager"
-          fetchpriority="high"
-        />
+        <figure class="portada">
+          <Image
+            src={d.portada}
+            alt={d.portada_alt ?? ''}
+            widths={[720, 1080, 1440, 1920]}
+            sizes="(max-width: 1240px) 94vw, 1160px"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </figure>
       )
     }
 
@@ -59,34 +64,98 @@ const { Content } = await render(entrada);
       <Content />
     </div>
 
-    <nav class="navegacion estrecho" aria-label="Más entradas">
-      {anterior ? <a href={`/bitacora/${anterior.id}/`}>← {anterior.data.titulo}</a> : <span />}
-      {posterior && <a class="derecha" href={`/bitacora/${posterior.id}/`}>{posterior.data.titulo} →</a>}
+    {
+      d.etiquetas.length > 0 && (
+        <div class="etiquetas-final">
+          <Etiquetas etiquetas={d.etiquetas} />
+        </div>
+      )
+    }
+
+    <nav class="navegacion" aria-label="Más entradas">
+      {
+        anterior ? (
+          <a href={`/bitacora/${anterior.id}/`}>
+            <span class="etiqueta">← Anterior</span>
+            <span class="t">{anterior.data.titulo}</span>
+          </a>
+        ) : (
+          <span />
+        )
+      }
+      {
+        posterior && (
+          <a class="derecha" href={`/bitacora/${posterior.id}/`}>
+            <span class="etiqueta">Siguiente →</span>
+            <span class="t">{posterior.data.titulo}</span>
+          </a>
+        )
+      }
     </nav>
   </article>
 </BaseLayout>
 
 <style>
-  header {
-    margin-bottom: 1.5rem;
+  .cabecera-entrada {
+    max-width: 52rem;
+    margin-bottom: var(--e-12);
+  }
+  .cabecera-entrada h1 {
+    margin: var(--e-3) 0 var(--e-6);
+    font-size: clamp(2.2rem, 1.5rem + 2.8vw, 3.6rem);
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-2) var(--e-6);
+    margin: var(--e-6) 0 0;
+    padding-top: var(--e-4);
+    border-top: 1px solid var(--linea);
   }
   .portada {
+    margin: 0 0 var(--e-12);
+  }
+  .portada :global(img) {
     width: 100%;
-    max-width: 60rem;
     border-radius: var(--radio);
-    margin: 1rem 0 2rem;
+    box-shadow: 0 0 0 1px var(--linea);
+  }
+  .etiquetas-final {
+    max-width: var(--ancho-texto);
+    margin-top: var(--e-8);
   }
   .navegacion {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: 3rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--borde);
-    font-weight: 600;
-    font-size: 0.95rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--e-8);
+    margin-top: var(--e-16);
+    padding-top: var(--e-6);
+    border-top: 1px solid var(--tinta);
+  }
+  .navegacion a {
+    display: grid;
+    gap: var(--e-2);
+    text-decoration: none;
+    color: var(--tinta);
+  }
+  .navegacion a:hover .t {
+    color: var(--acento-texto);
+  }
+  .t {
+    font-family: var(--titulos);
+    font-size: 1.25rem;
+    line-height: 1.3;
+    transition: color var(--transicion);
   }
   .derecha {
     text-align: right;
+  }
+  @media (max-width: 600px) {
+    .navegacion {
+      grid-template-columns: 1fr;
+    }
+    .derecha {
+      text-align: left;
+    }
   }
 </style>

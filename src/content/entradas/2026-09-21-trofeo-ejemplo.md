@@ -5,7 +5,7 @@ resumen: Crónica de ejemplo con los datos de regata rellenos. Sustitúyela por 
 proyecto: src/content/proyectos/diario-de-regatas.md
 etiquetas: [crónica, orc, táctica]
 portada: ../../assets/imagenes/regata-ejemplo.jpg
-portada_alt: Ilustración de un velero
+portada_alt: Ilustración de un recorrido de regata (sustitúyela por una foto)
 regata:
   nombre: Trofeo de Ejemplo 2026
   lugar: "[Club / bahía]"

@@ -1,14 +1,16 @@
 ---
 import { Image } from 'astro:assets';
 import { CATEGORIAS, ESTADOS } from '../lib/constantes';
-import type { Proyecto } from '../lib/contenido';
+import { dosCifras, type Proyecto } from '../lib/contenido';
 
 interface Props {
   proyecto: Proyecto;
+  /** Número de orden que se muestra («01», «02»…) */
+  numero?: number;
   /** true en las primeras tarjetas visibles: carga la imagen sin esperar (mejor LCP) */
   prioridad?: boolean;
 }
-const { proyecto, prioridad = false } = Astro.props;
+const { proyecto, numero, prioridad = false } = Astro.props;
 const d = proyecto.data;
 ---
 
@@ -19,8 +21,8 @@ const d = proyecto.data;
         <Image
           src={d.portada}
           alt={d.portada_alt ?? ''}
-          widths={[400, 640, 960]}
-          sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 380px"
+          widths={[480, 720, 960, 1280]}
+          sizes="(max-width: 700px) calc(100vw - 2rem), (max-width: 1200px) 46vw, 560px"
           loading={prioridad ? 'eager' : 'lazy'}
         />
       ) : (
@@ -28,18 +30,18 @@ const d = proyecto.data;
       )
     }
   </div>
-  <div class="cuerpo">
-    <p class="meta">
-      <span class="chip">{CATEGORIAS[d.categoria]}</span>
-      <span class:list={['estado', `estado-${d.estado}`]}>{ESTADOS[d.estado]}</span>
-      {d.borrador && <span class="chip">Borrador</span>}
-    </p>
-    <h3>
-      <!-- El enlace ocupa toda la tarjeta (ver ::after) -->
-      <a href={`/proyectos/${proyecto.id}/`}>{d.titulo}</a>
-    </h3>
-    <p class="resumen">{d.resumen}</p>
-  </div>
+  <p class="meta etiqueta">
+    {numero != null && <span class="numero">{dosCifras(numero)}</span>}
+    <span>{CATEGORIAS[d.categoria]}</span>
+    <span>{d.fecha_inicio.getUTCFullYear()}</span>
+    {d.borrador && <span class="borrador">Borrador</span>}
+  </p>
+  <h3>
+    <!-- El enlace ocupa toda la tarjeta (ver ::after) -->
+    <a href={`/proyectos/${proyecto.id}/`}>{d.titulo}</a>
+  </h3>
+  <p class="resumen">{d.resumen}</p>
+  <p class:list={['estado', `estado-${d.estado}`]}>{ESTADOS[d.estado]}</p>
 </article>
 
 <style>
@@ -47,51 +49,57 @@ const d = proyecto.data;
     position: relative;
     display: flex;
     flex-direction: column;
-    background: var(--fondo);
-    border: 1px solid var(--borde);
-    border-radius: var(--radio);
-    overflow: hidden;
-    box-shadow: var(--sombra);
-    transition:
-      transform 0.15s ease,
-      border-color 0.15s ease;
-  }
-  .tarjeta:hover {
-    transform: translateY(-2px);
-    border-color: var(--acento);
   }
   .imagen {
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: var(--radio);
     background: var(--marino);
+    /* Filete interior: un borde fino que no ocupa espacio */
+    box-shadow: inset 0 0 0 1px var(--linea);
   }
   .imagen :global(img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 600ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .tarjeta:hover .imagen :global(img) {
+    transform: scale(1.025);
   }
   .sin-imagen {
     height: 100%;
     background: linear-gradient(135deg, var(--marino), var(--marino-2));
   }
-  .cuerpo {
-    padding: 1rem 1.15rem 1.25rem;
-  }
   .meta {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 0.6rem;
-    margin: 0 0 0.6rem;
-    font-size: 0.85rem;
-    color: var(--texto-suave);
+    gap: 0.35rem 0.9rem;
+    margin: var(--e-4) 0 var(--e-2);
+  }
+  .numero {
+    color: var(--acento-texto);
+  }
+  .borrador {
+    color: var(--acento-texto);
   }
   h3 {
-    margin: 0 0 0.4rem;
-    font-size: 1.2rem;
+    margin: 0 0 var(--e-2);
+    font-size: clamp(1.4rem, 1.25rem + 0.5vw, 1.65rem);
+    letter-spacing: -0.015em;
   }
   h3 a {
-    color: var(--texto);
+    color: var(--tinta);
     text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0 1px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size 300ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  /* Detalle: el título se subraya de izquierda a derecha al pasar por la tarjeta */
+  .tarjeta:hover h3 a {
+    background-size: 100% 1px;
   }
   h3 a::after {
     content: '';
@@ -99,11 +107,14 @@ const d = proyecto.data;
     inset: 0;
   }
   .resumen {
-    margin: 0;
-    color: var(--texto-suave);
-    font-size: 0.95rem;
+    margin: 0 0 var(--e-3);
+    color: var(--tinta-2);
+    font-size: 0.97rem;
+    line-height: 1.6;
   }
-  [hidden] {
-    display: none;
+  .estado {
+    margin: auto 0 0;
+    font-size: 0.82rem;
+    color: var(--tinta-2);
   }
 </style>

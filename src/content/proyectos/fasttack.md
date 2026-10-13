@@ -6,7 +6,7 @@ estado: en-desarrollo
 categoria: software
 etiquetas: [claude-code, python, análisis de datos, j70]
 portada: ../../assets/imagenes/fasttack-portada.jpg
-portada_alt: Portada de FastTack con un gráfico de rendimiento
+portada_alt: Ilustración de un track de ceñida con viradas hasta la baliza y un gráfico de velocidad
 destacado: true
 enlaces:
   repositorio: https://github.com/jpadront/fasttack

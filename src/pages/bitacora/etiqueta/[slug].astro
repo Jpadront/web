@@ -20,10 +20,30 @@ const { nombre, entradas } = Astro.props;
 ---
 
 <BaseLayout titulo={`#${nombre}`} descripcion={`Entradas de la bitácora con la etiqueta «${nombre}».`}>
-  <div class="contenedor seccion estrecho">
-    <p class="antetitulo"><a href="/bitacora/">Bitácora</a> · Etiqueta</p>
-    <h1>#{nombre}</h1>
-    <p class="texto-suave">{entradas.length} {entradas.length === 1 ? 'entrada' : 'entradas'}</p>
-    {entradas.map((e) => <TarjetaEntrada entrada={e} />)}
+  <div class="contenedor seccion">
+    <header>
+      <p class="etiqueta"><a href="/bitacora/">Bitácora</a> / Etiqueta</p>
+      <h1>#{nombre}</h1>
+      <p class="etiqueta">{entradas.length} {entradas.length === 1 ? 'entrada' : 'entradas'}</p>
+    </header>
+    <div class="lista">
+      {entradas.map((e) => <TarjetaEntrada entrada={e} />)}
+    </div>
+    <p><a class="enlace-flecha" href="/bitacora/">Toda la bitácora</a></p>
   </div>
 </BaseLayout>
+
+<style>
+  header {
+    margin-bottom: var(--e-12);
+    padding-bottom: var(--e-6);
+    border-bottom: 1px solid var(--tinta);
+  }
+  h1 {
+    margin: var(--e-3) 0 var(--e-2);
+  }
+  .lista {
+    max-width: 52rem;
+    margin-bottom: var(--e-8);
+  }
+</style>

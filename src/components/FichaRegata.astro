@@ -1,69 +1,124 @@
 ---
-// Ficha con los datos de una regata (Diario de regatas)
+// Ficha con los datos de una regata (Diario de regatas), como una hoja de datos
 import type { Entrada } from '../lib/contenido';
-import { textoPosicion } from '../lib/contenido';
 
 interface Props {
   regata: Entrada['data']['regata'];
 }
 const { regata: r } = Astro.props;
-const filas = [
+const datos = [
   ['Regata', r.nombre],
   ['Lugar', r.lugar],
   ['Barco', r.barco],
   ['Clase', r.clase],
-  ['Posición', textoPosicion(r.posicion, r.participantes)],
   ['Pruebas', r.pruebas?.toString()],
   ['Viento', r.viento],
 ].filter(([, v]) => v) as [string, string][];
 ---
 
 <aside class="ficha" aria-label="Datos de la regata">
+  {
+    r.posicion && (
+      <div class="posicion">
+        <span class="etiqueta">Posición</span>
+        <span class="cifra">
+          {r.posicion}
+          <sup>º</sup>
+        </span>
+        {r.participantes && <span class="etiqueta">de {r.participantes} barcos</span>}
+      </div>
+    )
+  }
   <dl>
     {
-      filas.map(([k, v]) => (
-        <div class:list={{ destacado: k === 'Posición' }}>
-          <dt>{k}</dt>
+      datos.map(([k, v]) => (
+        <div>
+          <dt class="etiqueta">{k}</dt>
           <dd>{v}</dd>
         </div>
       ))
     }
   </dl>
-  {r.notas && <p class="notas"><strong>Notas:</strong> {r.notas}</p>}
+  {
+    r.notas && (
+      <p class="notas">
+        <span class="etiqueta">Notas</span>
+        {r.notas}
+      </p>
+    )
+  }
 </aside>
 
 <style>
   .ficha {
-    border: 1px solid var(--borde);
-    border-left: 4px solid var(--acento);
-    border-radius: var(--radio);
-    background: var(--superficie);
-    padding: 1rem 1.2rem;
-    margin: 1.5rem 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 52rem;
+    margin: 0 0 var(--e-12);
+    border-top: 1px solid var(--tinta);
+    border-bottom: 1px solid var(--linea);
+  }
+  @media (min-width: 640px) {
+    .ficha {
+      grid-template-columns: 10rem minmax(0, 1fr);
+    }
+  }
+  .posicion {
+    display: grid;
+    align-content: start;
+    gap: var(--e-1);
+    padding: var(--e-4) var(--e-6) var(--e-4) 0;
+    border-bottom: 1px solid var(--linea);
+  }
+  @media (min-width: 640px) {
+    .posicion {
+      border-bottom: 0;
+      border-right: 1px solid var(--linea);
+      grid-row: span 2;
+    }
+  }
+  .cifra {
+    font-family: var(--titulos);
+    font-size: 4rem;
+    line-height: 1;
+    color: var(--acento-texto);
+    font-variant-numeric: lining-nums;
+  }
+  .cifra sup {
+    font-size: 0.4em;
+    vertical-align: 1.1em;
+    margin-left: 0.04em;
   }
   dl {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-    gap: 0.75rem 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
     margin: 0;
   }
-  dt {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--texto-suave);
-    font-weight: 700;
+  dl > div {
+    padding: var(--e-4) var(--e-4) var(--e-4) 0;
+  }
+  @media (min-width: 640px) {
+    dl > div {
+      padding-left: var(--e-6);
+    }
   }
   dd {
-    margin: 0;
-    font-weight: 600;
-  }
-  .destacado dd {
-    color: var(--acento-texto);
-    font-size: 1.15rem;
+    margin: var(--e-1) 0 0;
+    font-size: 0.95rem;
+    font-weight: 500;
   }
   .notas {
-    margin: 0.9rem 0 0;
+    display: grid;
+    gap: var(--e-1);
+    margin: 0;
+    padding: var(--e-4) 0;
+    border-top: 1px solid var(--linea);
     font-size: 0.95rem;
+    color: var(--tinta-2);
+  }
+  @media (min-width: 640px) {
+    .notas {
+      padding-left: var(--e-6);
+    }
   }
 </style>

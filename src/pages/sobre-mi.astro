@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import { getEntry, render } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import RedesSociales from '../components/RedesSociales.astro';
+import { sitio } from '../lib/sitio';
 
 // El contenido sale de src/content/paginas/sobre-mi.md (editable desde Pages CMS)
 const pagina = await getEntry('paginas', 'sobre-mi');
@@ -12,36 +13,73 @@ const d = pagina.data;
 ---
 
 <BaseLayout titulo={d.titulo} descripcion={d.descripcion} imagen={d.foto}>
-  <div class="contenedor seccion sobre-mi">
-    {d.foto && <Image class="foto" src={d.foto} alt={d.foto_alt ?? ''} width={320} height={320} densities={[1, 2]} loading="eager" />}
-    <div>
+  <div class="contenedor seccion">
+    <header class="cabecera-pagina">
+      <p class="etiqueta">{sitio.nombre}</p>
       <h1>{d.titulo}</h1>
+      <p class="entradilla">{d.descripcion}</p>
+    </header>
+    <div class="sobre-mi">
+      <aside class="lateral">
+        {
+          d.foto && (
+            <figure>
+              <Image class="foto" src={d.foto} alt={d.foto_alt ?? ''} widths={[320, 480, 640]} sizes="(max-width: 860px) 60vw, 18rem" loading="eager" />
+            </figure>
+          )
+        }
+        <p class="etiqueta">Contacto</p>
+        <RedesSociales conTexto />
+      </aside>
       <div class="prosa">
         <Content />
       </div>
-      <RedesSociales conTexto />
     </div>
   </div>
 </BaseLayout>
 
 <style>
+  .cabecera-pagina {
+    margin-bottom: var(--e-12);
+  }
+  .cabecera-pagina h1 {
+    margin: var(--e-3) 0 var(--e-4);
+  }
   .sobre-mi {
     display: grid;
-    gap: 2rem;
-    align-items: start;
+    gap: var(--e-12);
+    padding-top: var(--e-8);
+    border-top: 1px solid var(--tinta);
   }
-  @media (min-width: 800px) {
+  @media (min-width: 860px) {
     .sobre-mi {
-      grid-template-columns: 16rem 1fr;
-      gap: 3rem;
+      grid-template-columns: 18rem minmax(0, 1fr);
+      gap: var(--e-16);
     }
+    .lateral {
+      position: sticky;
+      top: 6rem;
+      align-self: start;
+    }
+  }
+  figure {
+    margin: 0 0 var(--e-8);
+    max-width: 18rem;
   }
   .foto {
     width: 100%;
-    max-width: 16rem;
-    aspect-ratio: 1;
+    aspect-ratio: 4 / 5;
     object-fit: cover;
-    border-radius: 50%;
-    border: 4px solid var(--acento);
+    border-radius: var(--radio);
+    box-shadow: 0 0 0 1px var(--linea);
+    /* Detalle: la foto en escala de grises recupera el color al pasar el ratón */
+    filter: grayscale(0.85) contrast(1.05);
+    transition: filter 600ms ease;
+  }
+  .foto:hover {
+    filter: none;
+  }
+  .lateral > .etiqueta {
+    margin-bottom: var(--e-2);
   }
 </style>

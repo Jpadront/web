@@ -1,41 +1,76 @@
 ---
 import { sitio } from '../lib/sitio';
 import RedesSociales from './RedesSociales.astro';
+import Gallardete from './Gallardete.astro';
 const anio = new Date().getFullYear();
 ---
 
 <footer class="pie">
-  <div class="contenedor fila">
-    <p>© {anio} {sitio.nombre}</p>
-    <RedesSociales />
-    <p class="enlaces">
-      <a href="/rss.xml">RSS</a>
-      <a href="/calculadora-orc/">Calculadora ORC</a>
+  <div class="contenedor">
+    <div class="fila">
+      <div class="firma">
+        <Gallardete tamano={18} />
+        <span>{sitio.nombre}</span>
+      </div>
+      <nav aria-label="Pie de página">
+        <a href="/proyectos/">Proyectos</a>
+        <a href="/bitacora/">Bitácora</a>
+        <a href="/sobre-mi/">Sobre mí</a>
+        <a href="/calculadora-orc/">Calculadora ORC</a>
+        <a href="/rss.xml">RSS</a>
+      </nav>
+      <RedesSociales />
+    </div>
+    <p class="colofon">
+      © {anio} {sitio.nombre}. Hecha a mano con <a href="https://astro.build">Astro</a> y publicada en Cloudflare Pages. Sin
+      cookies ni analítica.
     </p>
   </div>
 </footer>
 
 <style>
   .pie {
-    margin-top: 4rem;
-    border-top: 1px solid var(--borde);
-    background: var(--superficie);
-    font-size: 0.9rem;
-    color: var(--texto-suave);
+    margin-top: var(--e-24);
+    border-top: 1px solid var(--linea);
+    font-size: 0.88rem;
+    color: var(--tinta-2);
   }
   .fila {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding-block: 1.75rem;
+    gap: var(--e-4) var(--e-8);
+    padding-block: var(--e-8) var(--e-6);
   }
-  p {
-    margin: 0;
-  }
-  .enlaces {
+  .firma {
     display: flex;
-    gap: 1rem;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--tinta);
+    font-weight: 600;
+  }
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-2) var(--e-6);
+  }
+  nav a {
+    color: var(--tinta-2);
+    text-decoration: none;
+  }
+  nav a:hover {
+    color: var(--tinta);
+  }
+  .colofon {
+    margin: 0;
+    padding-block: var(--e-4) var(--e-8);
+    border-top: 1px solid var(--linea);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--tinta-3);
+  }
+  .colofon a {
+    color: inherit;
   }
 </style>

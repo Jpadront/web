@@ -63,3 +63,20 @@ export function textoPosicion(posicion?: number, participantes?: number) {
   if (!posicion) return undefined;
   return participantes ? `${posicion}.º de ${participantes}` : `${posicion}.º`;
 }
+
+/** Fecha corta para listados tipo cuaderno de bitácora: «01.10.2026». */
+export const formatoFechaCorta = (d: Date) =>
+  `${String(d.getUTCDate()).padStart(2, '0')}.${String(d.getUTCMonth() + 1).padStart(2, '0')}.${d.getUTCFullYear()}`;
+
+/** Minutos de lectura aproximados (220 palabras por minuto; mínimo 1). */
+export function minutosLectura(texto = ''): number {
+  const palabras = texto
+    .replace(/```[\s\S]*?```/g, ' ') // sin bloques de código
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // sin imágenes
+    .split(/\s+/)
+    .filter(Boolean).length;
+  return Math.max(1, Math.round(palabras / 220));
+}
+
+/** Número de orden con dos cifras: 1 → «01». */
+export const dosCifras = (n: number) => String(n).padStart(2, '0');

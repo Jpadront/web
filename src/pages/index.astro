@@ -4,45 +4,80 @@ import TarjetaProyecto from '../components/TarjetaProyecto.astro';
 import TarjetaEntrada from '../components/TarjetaEntrada.astro';
 import RedesSociales from '../components/RedesSociales.astro';
 import { sitio } from '../lib/sitio';
-import { getEntradas, getProyectos } from '../lib/contenido';
+import { dosCifras, fechaISO, formatoFechaCorta, getEntradas, getProyectos } from '../lib/contenido';
 
 const proyectos = await getProyectos();
 // Destacados: los marcados como «destacado»; si no hay ninguno, los más recientes
 const marcados = proyectos.filter((p) => p.data.destacado);
 const destacados = (marcados.length ? marcados : proyectos).slice(0, 4);
-const ultimas = (await getEntradas()).slice(0, 5);
+const entradas = await getEntradas();
+const ultimas = entradas.slice(0, 4);
+const regatas = entradas.filter((e) => e.data.regata.nombre).length;
+
+// Pequeño índice en cifras junto a la presentación (se actualiza solo)
+const indice = [
+  { k: 'Proyectos', v: dosCifras(proyectos.length), href: '/proyectos/' },
+  { k: 'Entradas', v: dosCifras(entradas.length), href: '/bitacora/' },
+  { k: 'Regatas', v: dosCifras(regatas), href: '/proyectos/diario-de-regatas/' },
+];
 ---
 
 <BaseLayout titulo={sitio.titulo}>
-  <section class="portada">
-    <div class="contenedor">
-      <p class="antetitulo">Proyectos · Vela · Software · Impresión 3D</p>
+  <section class="contenedor portada">
+    <div class="texto">
+      <p class="etiqueta">Cuaderno de proyectos</p>
       <h1>{sitio.nombre}</h1>
-      <p class="presentacion">{sitio.presentacion}</p>
+      <p class="entradilla">{sitio.presentacion}</p>
       <div class="acciones">
-        <a class="boton boton-primario" href="/proyectos/">Ver proyectos</a>
-        <a class="boton" href="/bitacora/">Leer la bitácora</a>
+        <a class="enlace-flecha" href="/proyectos/">Ver los proyectos</a>
+        <a class="enlace-flecha" href="/bitacora/">Leer la bitácora</a>
       </div>
+    </div>
+    <aside class="indice" aria-label="Índice">
+      <dl>
+        {
+          indice.map((i) => (
+            <div>
+              <dt class="etiqueta">{i.k}</dt>
+              <dd>
+                <a href={i.href}>{i.v}</a>
+              </dd>
+            </div>
+          ))
+        }
+        {
+          entradas[0] && (
+            <div class="ultima">
+              <dt class="etiqueta">Última entrada</dt>
+              <dd class="mono">
+                <a href={`/bitacora/${entradas[0].id}/`}>
+                  <time datetime={fechaISO(entradas[0].data.fecha)}>{formatoFechaCorta(entradas[0].data.fecha)}</time>
+                </a>
+              </dd>
+            </div>
+          )
+        }
+      </dl>
       <RedesSociales />
+    </aside>
+  </section>
+
+  <section class="contenedor seccion">
+    <div class="cabecera-seccion">
+      <h2>Proyectos</h2>
+      <a class="enlace-flecha" href="/proyectos/">Todos</a>
+    </div>
+    <div class="rejilla-proyectos">
+      {destacados.map((p, i) => <TarjetaProyecto proyecto={p} numero={i + 1} prioridad={i < 2} />)}
     </div>
   </section>
 
   <section class="contenedor seccion">
-    <div class="titulo-seccion">
-      <h2>Proyectos destacados</h2>
-      <a href="/proyectos/">Todos los proyectos →</a>
+    <div class="cabecera-seccion">
+      <h2>Bitácora</h2>
+      <a class="enlace-flecha" href="/bitacora/">Todas las entradas</a>
     </div>
-    <div class="rejilla destacados">
-      {destacados.map((p, i) => <TarjetaProyecto proyecto={p} prioridad={i < 2} />)}
-    </div>
-  </section>
-
-  <section class="contenedor seccion">
-    <div class="titulo-seccion">
-      <h2>Últimas entradas</h2>
-      <a href="/bitacora/">Toda la bitácora →</a>
-    </div>
-    <div class="estrecho">
+    <div class="lista-entradas">
       {ultimas.length ? ultimas.map((e) => <TarjetaEntrada entrada={e} />) : <p class="texto-suave">Todavía no hay entradas.</p>}
     </div>
   </section>
@@ -50,42 +85,72 @@ const ultimas = (await getEntradas()).slice(0, 5);
 
 <style>
   .portada {
-    padding-block: clamp(3rem, 8vw, 6rem) clamp(2rem, 5vw, 3.5rem);
-    background:
-      radial-gradient(60rem 30rem at 85% -10%, color-mix(in srgb, var(--acento) 14%, transparent), transparent 60%),
-      linear-gradient(180deg, var(--superficie), var(--fondo));
-    border-bottom: 1px solid var(--borde);
+    display: grid;
+    gap: var(--e-12);
+    padding-block: clamp(var(--e-12), 9vw, 8.5rem) clamp(var(--e-8), 4vw, var(--e-12));
   }
-  .presentacion {
-    max-width: 40rem;
-    font-size: clamp(1.05rem, 1rem + 0.4vw, 1.25rem);
-    color: var(--texto-suave);
+  @media (min-width: 900px) {
+    .portada {
+      grid-template-columns: minmax(0, 1fr) 16rem;
+      align-items: end;
+    }
+  }
+  h1 {
+    margin: var(--e-4) 0 var(--e-6);
+  }
+  .entradilla {
+    margin-bottom: var(--e-8);
   }
   .acciones {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin: 1.5rem 0;
+    gap: var(--e-3) var(--e-8);
   }
-  /* Destacados en 2 columnas en escritorio (4 proyectos → rejilla 2×2) */
-  @media (min-width: 900px) {
-    .destacados {
-      grid-template-columns: repeat(2, 1fr);
+  .indice dl {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0 0 var(--e-6);
+    border-top: 1px solid var(--linea);
+  }
+  .indice dl > div {
+    padding: var(--e-3) 0;
+    border-bottom: 1px solid var(--linea);
+  }
+  .indice dl > div {
+    padding-right: var(--e-3);
+  }
+  .ultima {
+    grid-column: 1 / -1;
+  }
+  dd {
+    margin: 0;
+    font-family: var(--titulos);
+    font-size: 2rem;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  dd.mono {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    padding-top: 0.2rem;
+  }
+  dd a {
+    color: var(--tinta);
+    text-decoration: none;
+  }
+  dd a:hover {
+    color: var(--acento-texto);
+  }
+  .rejilla-proyectos {
+    display: grid;
+    gap: var(--e-12) var(--e-8);
+  }
+  @media (min-width: 700px) {
+    .rejilla-proyectos {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
-  .titulo-seccion {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.5rem 1rem;
-    margin-bottom: 1.25rem;
-  }
-  .titulo-seccion h2 {
-    margin: 0;
-  }
-  .titulo-seccion a {
-    font-weight: 600;
-    font-size: 0.95rem;
+  .lista-entradas {
+    max-width: 52rem;
   }
 </style>

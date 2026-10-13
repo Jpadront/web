@@ -8,12 +8,22 @@ import CalculadoraOrc from '../components/CalculadoraOrc.astro';
   descripcion="Calcula en el navegador el tiempo compensado ORC por tiempo sobre distancia en función del viento y la clasificación de varios barcos."
 >
   <div class="contenedor seccion">
-    <p class="antetitulo"><a href="/proyectos/calculo-tiempos-orc/">Proyecto: Cálculo de tiempos ORC</a></p>
-    <h1>Calculadora de tiempos ORC</h1>
-    <p class="texto-suave estrecho">
-      Introduce los barcos, su tiempo real y los coeficientes de su certificado. La clasificación se actualiza al momento. Los
-      datos de ejemplo son inventados.
-    </p>
-    <CalculadoraOrc />
+    <header>
+      <p class="etiqueta"><a href="/proyectos/calculo-tiempos-orc/">Proyectos / Cálculo de tiempos ORC</a></p>
+      <h1>Calculadora de tiempos ORC</h1>
+      <p class="entradilla">
+        Introduce los barcos, su tiempo real y los coeficientes de su certificado. La clasificación se actualiza al momento.
+      </p>
+    </header>
+    <CalculadoraOrc conTitulo={false} />
   </div>
 </BaseLayout>
+
+<style>
+  header {
+    margin-bottom: var(--e-8);
+  }
+  h1 {
+    margin: var(--e-3) 0 var(--e-4);
+  }
+</style>

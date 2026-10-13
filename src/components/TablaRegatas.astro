@@ -1,6 +1,6 @@
 ---
 // Tabla resumen del Diario de regatas: una fila por crónica con datos de regata
-import { fechaISO, formatoFecha, type Entrada } from '../lib/contenido';
+import { fechaISO, formatoFechaCorta, type Entrada } from '../lib/contenido';
 
 interface Props {
   entradas: Entrada[];
@@ -25,12 +25,16 @@ const { entradas } = Astro.props;
           const r = e.data.regata;
           return (
             <tr>
-              <td><time datetime={fechaISO(e.data.fecha)}>{formatoFecha(e.data.fecha)}</time></td>
-              <td><a href={`/bitacora/${e.id}/`}>{r.nombre}</a></td>
-              <td>{r.clase ?? '—'}</td>
+              <td class="mono fecha">
+                <time datetime={fechaISO(e.data.fecha)}>{formatoFechaCorta(e.data.fecha)}</time>
+              </td>
+              <td>
+                <a href={`/bitacora/${e.id}/`}>{r.nombre}</a>
+              </td>
+              <td class="texto-suave">{r.clase ?? '—'}</td>
               <td class="num">
                 {r.posicion ? <strong>{r.posicion}.º</strong> : '—'}
-                {r.posicion && r.participantes && <span class="texto-suave"> / {r.participantes}</span>}
+                {r.posicion && r.participantes && <span class="de"> / {r.participantes}</span>}
               </td>
             </tr>
           );
@@ -43,25 +47,38 @@ const { entradas } = Astro.props;
 <style>
   .tabla-envoltorio {
     overflow-x: auto;
-    margin: 1rem 0 1.5rem;
-    border: 1px solid var(--borde);
-    border-radius: var(--radio);
+    max-width: 52rem;
+    margin: 0 0 var(--e-12);
   }
   table {
-    min-width: 32rem;
+    min-width: 30rem;
   }
   th,
   td {
-    padding: 0.6rem 0.9rem;
+    padding: var(--e-3) var(--e-4) var(--e-3) 0;
   }
-  thead {
-    background: var(--superficie);
+  thead th {
+    border-bottom-color: var(--tinta);
   }
-  tbody tr:last-child td {
-    border-bottom: 0;
+  .fecha {
+    color: var(--tinta-3);
+    white-space: nowrap;
+  }
+  td a {
+    text-decoration-color: var(--linea-fuerte);
   }
   .num {
     text-align: right;
     white-space: nowrap;
+    padding-right: 0;
+  }
+  strong {
+    font-weight: 600;
+    color: var(--acento-texto);
+  }
+  .de {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--tinta-3);
   }
 </style>

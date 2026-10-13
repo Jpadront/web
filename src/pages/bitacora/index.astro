@@ -12,55 +12,110 @@ const porAnio = Map.groupBy(entradas, (e) => e.data.fecha.getUTCFullYear());
 
 <BaseLayout titulo="Bitácora" descripcion="Avances de los proyectos, crónicas de regatas y notas de lo que voy aprendiendo.">
   <div class="contenedor seccion">
-    <p class="antetitulo">Bitácora</p>
-    <h1>Avances, crónicas y notas</h1>
-    <p class="texto-suave estrecho">
-      Todo lo que publico, del más reciente al más antiguo. También puedes seguirlo por <a href="/rss.xml">RSS</a>.
-    </p>
+    <header class="cabecera-pagina">
+      <p class="etiqueta">Bitácora</p>
+      <h1>Avances, crónicas y notas</h1>
+      <p class="entradilla">
+        Lo que voy publicando, de lo más reciente a lo más antiguo. También se puede seguir por <a href="/rss.xml">RSS</a>.
+      </p>
+    </header>
 
-    {
-      etiquetas.length > 0 && (
-        <nav class="nube" aria-label="Etiquetas">
-          {etiquetas.map((t) => (
-            <a class="chip" href={`/bitacora/etiqueta/${t.slug}/`}>
-              #{t.nombre} <span class="n">{t.total}</span>
-            </a>
-          ))}
-        </nav>
-      )
-    }
+    <div class="columnas">
+      <div class="lista">
+        {
+          [...porAnio].map(([anio, lista]) => (
+            <section aria-labelledby={`anio-${anio}`}>
+              <h2 id={`anio-${anio}`} class="anio">
+                {anio}
+                <span class="etiqueta">
+                  {lista.length} {lista.length === 1 ? 'entrada' : 'entradas'}
+                </span>
+              </h2>
+              {lista.map((e) => (
+                <TarjetaEntrada entrada={e} />
+              ))}
+            </section>
+          ))
+        }
+        {entradas.length === 0 && <p>Todavía no hay entradas.</p>}
+      </div>
 
-    <div class="estrecho">
       {
-        [...porAnio].map(([anio, lista]) => (
-          <section>
-            <h2 class="anio">{anio}</h2>
-            {lista.map((e) => (
-              <TarjetaEntrada entrada={e} />
-            ))}
-          </section>
-        ))
+        etiquetas.length > 0 && (
+          <aside class="lateral" aria-label="Etiquetas">
+            <p class="etiqueta">Etiquetas</p>
+            <ul>
+              {etiquetas.map((t) => (
+                <li>
+                  <a href={`/bitacora/etiqueta/${t.slug}/`}>
+                    <span>#{t.nombre}</span>
+                    <span class="n">{t.total}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )
       }
-      {entradas.length === 0 && <p>Todavía no hay entradas.</p>}
     </div>
   </div>
 </BaseLayout>
 
 <style>
-  .nube {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    margin: 1.5rem 0 1rem;
+  .cabecera-pagina {
+    margin-bottom: var(--e-12);
   }
-  .n {
-    opacity: 0.6;
-    font-weight: 500;
+  .cabecera-pagina h1 {
+    margin: var(--e-3) 0 var(--e-4);
+  }
+  .columnas {
+    display: grid;
+    gap: var(--e-12);
+  }
+  @media (min-width: 960px) {
+    .columnas {
+      grid-template-columns: minmax(0, 1fr) 14rem;
+      gap: var(--e-16);
+    }
+    .lateral {
+      position: sticky;
+      top: 6rem;
+      align-self: start;
+    }
   }
   .anio {
-    margin: 2rem 0 0;
-    font-size: 1rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: var(--e-12) 0 var(--e-6);
+    padding-bottom: var(--e-3);
+    border-bottom: 1px solid var(--tinta);
+    font-size: 1.5rem;
+  }
+  section:first-child .anio {
+    margin-top: 0;
+  }
+  .lateral ul {
+    list-style: none;
+    margin: var(--e-3) 0 0;
+    padding: 0;
+    border-top: 1px solid var(--linea);
+  }
+  .lateral a {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--e-2) 0;
+    border-bottom: 1px solid var(--linea);
+    font-size: 0.92rem;
+    color: var(--tinta-2);
+    text-decoration: none;
+  }
+  .lateral a:hover {
     color: var(--acento-texto);
-    letter-spacing: 0.05em;
+  }
+  .n {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--tinta-3);
   }
 </style>

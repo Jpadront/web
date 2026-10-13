@@ -2,10 +2,19 @@
 // Calculadora de tiempos compensados ORC (tiempo sobre distancia en función del viento).
 // Interfaz en el navegador; las fórmulas y los coeficientes están en src/lib/orc.ts.
 import { TRAMOS_TRIPLE, VIENTOS_TABLA } from '../lib/orc';
+
+interface Props {
+  /** false en la página propia de la calculadora, que ya tiene su título */
+  conTitulo?: boolean;
+}
+const { conTitulo = true } = Astro.props;
 ---
 
 <section class="calc" aria-labelledby="calc-titulo" data-calc>
-  <h2 id="calc-titulo">Calculadora de tiempos ORC</h2>
+  <div class:list={['cabecera-calc', { 'solo-lectores': !conTitulo }]}>
+    <p class="etiqueta">Herramienta</p>
+    <h2 id="calc-titulo">Calculadora de tiempos ORC</h2>
+  </div>
   <p class="texto-suave intro">
     Tiempo sobre distancia: <code>Tc = Tr − C × D</code>, con el coeficiente <code>C</code> de cada barco para el viento de la
     prueba. Los datos se guardan solo en tu navegador.
@@ -13,6 +22,7 @@ import { TRAMOS_TRIPLE, VIENTOS_TABLA } from '../lib/orc';
 
   <noscript><p><strong>La calculadora necesita JavaScript activado.</strong></p></noscript>
 
+  <h3><span class="paso">01</span> La prueba</h3>
   <form class="ajustes" data-ajustes onsubmit="return false">
     <label>
       <span>Sistema</span>
@@ -33,7 +43,7 @@ import { TRAMOS_TRIPLE, VIENTOS_TABLA } from '../lib/orc';
     <p class="nota" data-nota aria-live="polite"></p>
   </form>
 
-  <h3>Barcos</h3>
+  <h3><span class="paso">02</span> Barcos</h3>
   <p class="texto-suave ayuda">
     Tiempo real como <code>h:mm:ss</code> (o <code>mm:ss</code>). Déjalo vacío si el barco no terminó. Coeficientes en
     segundos por milla, copiados del certificado.
@@ -45,7 +55,7 @@ import { TRAMOS_TRIPLE, VIENTOS_TABLA } from '../lib/orc';
     <button type="button" class="boton" data-accion="vaciar">Vaciar</button>
   </p>
 
-  <h3>Clasificación</h3>
+  <h3><span class="paso">03</span> Clasificación</h3>
   <div class="tabla-envoltorio">
     <table>
       <thead>
@@ -286,73 +296,100 @@ import { TRAMOS_TRIPLE, VIENTOS_TABLA } from '../lib/orc';
 
 <style>
   .calc {
-    margin: 2.5rem 0;
-    padding: clamp(1rem, 3vw, 1.75rem);
-    border: 1px solid var(--borde);
-    border-top: 4px solid var(--acento);
-    border-radius: var(--radio);
+    margin: var(--e-12) 0;
+    padding: clamp(var(--e-4), 3vw, var(--e-8));
+    border: 1px solid var(--linea);
+    border-top: 2px solid var(--tinta);
+    border-radius: 0 0 var(--radio) var(--radio);
     background: var(--superficie);
   }
-  .calc h2 {
-    margin-top: 0;
+  .cabecera-calc h2 {
+    margin: var(--e-2) 0 var(--e-4);
   }
   .calc h3 {
-    margin: 1.75rem 0 0.4rem;
+    display: flex;
+    align-items: baseline;
+    gap: var(--e-3);
+    margin: var(--e-8) 0 var(--e-3);
+    padding-bottom: var(--e-2);
+    border-bottom: 1px solid var(--linea);
+    font-size: 1.2rem;
+  }
+  .paso {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--acento-texto);
+    letter-spacing: 0.05em;
   }
   .intro,
   .ayuda {
-    font-size: 0.95rem;
+    font-size: 0.93rem;
+    max-width: var(--ancho-texto);
   }
   label {
     display: grid;
+    gap: 0.3rem;
     min-width: 0;
-    gap: 0.25rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--texto-suave);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--tinta-3);
   }
   input,
   select {
-    font: inherit;
+    font-family: var(--texto);
     font-size: 1rem;
-    color: var(--texto);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--tinta);
     background: var(--fondo);
-    border: 1px solid var(--borde);
-    border-radius: 8px;
-    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radio-pequeno);
+    padding: 0.5rem 0.65rem;
     width: 100%;
     min-width: 0;
+    transition:
+      border-color var(--transicion),
+      box-shadow var(--transicion);
+  }
+  input:hover,
+  select:hover {
+    border-color: var(--tinta-3);
   }
   input:focus,
   select:focus {
     border-color: var(--acento);
     outline: none;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 25%, transparent);
+    box-shadow: 0 0 0 3px var(--acento-suave);
   }
   .ajustes {
     display: grid;
-    gap: 0.9rem;
+    gap: var(--e-4);
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-    margin-top: 1rem;
   }
-  [hidden] {
-    display: none;
+  @media (min-width: 900px) {
+    .ajustes {
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+    }
   }
   .nota {
     grid-column: 1 / -1;
     margin: 0;
-    font-size: 0.9rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
     color: var(--acento-texto);
-    font-weight: 600;
   }
   .barcos {
     display: grid;
-    gap: 0.75rem;
+    gap: var(--e-3);
   }
   .barco {
     margin: 0;
-    padding: 0.85rem;
-    border: 1px solid var(--borde);
+    padding: var(--e-4);
+    border: 1px solid var(--linea);
     border-radius: var(--radio);
     background: var(--fondo);
     min-width: 0;
@@ -360,29 +397,34 @@ import { TRAMOS_TRIPLE, VIENTOS_TABLA } from '../lib/orc';
   .fila-principal {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) auto;
-    gap: 0.6rem;
+    gap: var(--e-3);
     align-items: end;
   }
   .quitar {
-    width: 2.4rem;
-    height: 2.4rem;
-    border-radius: 50%;
-    border: 1px solid var(--borde);
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: var(--radio-pequeno);
+    border: 1px solid transparent;
     background: transparent;
-    color: var(--texto-suave);
+    color: var(--tinta-3);
     font-size: 1.3rem;
     line-height: 1;
     cursor: pointer;
+    transition:
+      color var(--transicion),
+      border-color var(--transicion);
   }
   .quitar:hover {
-    border-color: var(--acento);
+    border-color: var(--linea-fuerte);
     color: var(--acento-texto);
   }
   .coefs {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 4.4rem), 1fr));
-    gap: 0.5rem;
-    margin-top: 0.6rem;
+    gap: var(--e-2);
+    margin-top: var(--e-3);
+    padding-top: var(--e-3);
+    border-top: 1px dashed var(--linea);
   }
   /* Las casillas de coeficientes se crean desde JavaScript: no llevan el atributo de
      ámbito de Astro, así que sus estilos tienen que ser :global (limitados a .coefs) */
@@ -390,62 +432,83 @@ import { TRAMOS_TRIPLE, VIENTOS_TABLA } from '../lib/orc';
     display: grid;
     gap: 0.2rem;
     min-width: 0;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--texto-suave);
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+    color: var(--tinta-3);
   }
   .coefs :global(input) {
-    font: inherit;
-    font-size: 0.95rem;
-    color: var(--texto);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--tinta);
     background: var(--superficie);
-    border: 1px solid var(--borde);
-    border-radius: 8px;
+    border: 1px solid var(--linea);
+    border-radius: var(--radio-pequeno);
     width: 100%;
     min-width: 0;
     padding: 0.35rem 0.4rem;
-    font-variant-numeric: tabular-nums;
+    transition: border-color var(--transicion);
+  }
+  .coefs :global(input:hover) {
+    border-color: var(--linea-fuerte);
   }
   .coefs :global(input:focus) {
     border-color: var(--acento);
     outline: none;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 25%, transparent);
+    box-shadow: 0 0 0 3px var(--acento-suave);
   }
   .botones {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0.9rem 0 0;
+    gap: var(--e-2);
+    margin: var(--e-4) 0 0;
   }
   .tabla-envoltorio {
     overflow-x: auto;
-    border: 1px solid var(--borde);
+    border: 1px solid var(--linea);
     border-radius: var(--radio);
     background: var(--fondo);
   }
   table {
     min-width: 36rem;
-    font-variant-numeric: tabular-nums;
   }
   th,
   td {
-    padding: 0.55rem 0.8rem;
+    padding: var(--e-3) var(--e-4);
   }
-  .num {
+  tbody tr:last-child :global(td) {
+    border-bottom: 0;
+  }
+  .num,
+  :global([data-resultados] td.num) {
     text-align: right;
     white-space: nowrap;
+    font-family: var(--mono);
+    font-size: 0.85rem;
   }
-  :global(tr.primero) td {
-    font-weight: 700;
+  :global([data-resultados] tr.primero td) {
     color: var(--acento-texto);
+    font-weight: 600;
+  }
+  :global([data-resultados] tr) {
+    transition: background-color var(--transicion);
+  }
+  :global([data-resultados] tr:hover) {
+    background: var(--superficie);
   }
   .como {
-    margin-top: 1.5rem;
-    font-size: 0.95rem;
+    margin-top: var(--e-8);
+    font-size: 0.93rem;
+    max-width: var(--ancho-texto);
   }
   .como summary {
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 600;
+    list-style-position: inside;
+  }
+  .como summary::marker {
+    color: var(--acento-texto);
   }
   .como ol {
     padding-left: 1.2rem;

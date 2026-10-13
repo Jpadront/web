@@ -6,38 +6,64 @@ import { getProyectos } from '../../lib/contenido';
 
 const proyectos = await getProyectos();
 
-// Solo se ofrecen como filtro las categorías y estados que tienen algún proyecto
+// Solo se ofrecen como filtro las categorías y estados que tienen algún proyecto, con su recuento
 const usadas = <T extends string>(clave: 'categoria' | 'estado', todas: Record<T, string>) =>
-  (Object.entries(todas) as [T, string][]).filter(([k]) => proyectos.some((p) => p.data[clave] === k));
+  (Object.entries(todas) as [T, string][])
+    .map(([k, v]) => ({ k, v, n: proyectos.filter((p) => p.data[clave] === k).length }))
+    .filter((x) => x.n > 0);
 const categorias = usadas('categoria', CATEGORIAS);
 const estados = usadas('estado', ESTADOS);
 ---
 
 <BaseLayout titulo="Proyectos" descripcion="Todos mis proyectos: software, vela, impresión 3D y otros, con su estado actual.">
   <div class="contenedor seccion">
-    <p class="antetitulo">Proyectos</p>
-    <h1>Lo que estoy construyendo</h1>
+    <header class="cabecera-pagina">
+      <p class="etiqueta">Proyectos</p>
+      <h1>Lo que estoy construyendo</h1>
+      <p class="entradilla">Herramientas, crónicas y piezas: cada proyecto con su estado y lo que he ido aprendiendo por el camino.</p>
+    </header>
 
     <!-- Filtros: funcionan en el navegador (sin recargar) y se guardan en la URL (?categoria=vela&estado=terminado) -->
     <form class="filtros" aria-label="Filtrar proyectos" data-filtros>
       <fieldset>
-        <legend>Categoría</legend>
-        <label><input type="radio" name="categoria" value="" checked /> Todas</label>
-        {categorias.map(([k, v]) => <label><input type="radio" name="categoria" value={k} /> {v}</label>)}
+        <legend class="etiqueta">Categoría</legend>
+        <div class="opciones">
+          <label><input type="radio" name="categoria" value="" checked />Todas<span class="n">{proyectos.length}</span></label>
+          {
+            categorias.map((c) => (
+              <label>
+                <input type="radio" name="categoria" value={c.k} />
+                {c.v}
+                <span class="n">{c.n}</span>
+              </label>
+            ))
+          }
+        </div>
       </fieldset>
       <fieldset>
-        <legend>Estado</legend>
-        <label><input type="radio" name="estado" value="" checked /> Todos</label>
-        {estados.map(([k, v]) => <label><input type="radio" name="estado" value={k} /> {v}</label>)}
+        <legend class="etiqueta">Estado</legend>
+        <div class="opciones">
+          <label><input type="radio" name="estado" value="" checked />Todos</label>
+          {
+            estados.map((e) => (
+              <label>
+                <input type="radio" name="estado" value={e.k} />
+                {e.v}
+                <span class="n">{e.n}</span>
+              </label>
+            ))
+          }
+        </div>
       </fieldset>
+      <p class="contador etiqueta" aria-live="polite" data-contador>{proyectos.length} proyectos</p>
     </form>
 
-    <p class="contador texto-suave" aria-live="polite" data-contador>{proyectos.length} proyectos</p>
-
     <div class="rejilla" data-lista>
-      {proyectos.map((p, i) => <TarjetaProyecto proyecto={p} prioridad={i < 3} />)}
+      {proyectos.map((p, i) => <TarjetaProyecto proyecto={p} numero={i + 1} prioridad={i < 2} />)}
     </div>
-    <p class="vacio texto-suave" data-vacio hidden>No hay proyectos con esos filtros.</p>
+    <p class="vacio texto-suave" data-vacio hidden>
+      No hay proyectos con esos filtros. <button type="button" class="limpiar" data-limpiar>Quitar filtros</button>
+    </p>
   </div>
 </BaseLayout>
 
@@ -74,54 +100,71 @@ const estados = usadas('estado', ESTADOS);
     if (input) input.checked = true;
   }
   form.addEventListener('change', aplicar);
+  document.querySelector('[data-limpiar]')?.addEventListener('click', () => {
+    form.reset();
+    aplicar();
+  });
   aplicar();
 </script>
 
 <style>
+  .cabecera-pagina {
+    margin-bottom: var(--e-12);
+  }
+  .cabecera-pagina h1 {
+    margin: var(--e-3) 0 var(--e-4);
+  }
   .filtros {
-    display: grid;
-    gap: 0.75rem;
-    margin: 1.5rem 0 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--e-4) var(--e-12);
+    padding: var(--e-4) 0;
+    margin-bottom: var(--e-12);
+    border-block: 1px solid var(--linea);
   }
   fieldset {
     border: 0;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    align-items: center;
+    min-width: 0;
   }
   legend {
-    float: left;
-    width: 5.5rem;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--texto-suave);
+    padding: 0;
+    margin-bottom: var(--e-2);
   }
-  /* Los radio se ven como botones-chip */
+  .opciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-1) var(--e-4);
+  }
+  /* Opciones como texto; la elegida, en tinta y subrayada en naranja */
   label {
+    position: relative;
     cursor: pointer;
-    padding: 0.3rem 0.8rem;
-    border-radius: 999px;
-    border: 1px solid var(--borde);
-    font-size: 0.9rem;
-    font-weight: 600;
-    background: var(--fondo);
+    padding-block: 0.2rem;
+    font-size: 0.93rem;
+    color: var(--tinta-2);
+    transition: color var(--transicion);
   }
   label:hover {
-    border-color: var(--acento);
+    color: var(--tinta);
   }
   label:has(input:checked) {
-    background: var(--marino);
-    border-color: var(--marino);
-    color: #fff;
+    color: var(--tinta);
+    box-shadow: inset 0 -1.5px 0 var(--acento);
   }
   label:has(input:focus-visible) {
-    outline: 3px solid var(--acento);
-    outline-offset: 2px;
+    outline: 2px solid var(--acento);
+    outline-offset: 3px;
+    border-radius: var(--radio-pequeno);
+  }
+  .n {
+    margin-left: 0.3em;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--tinta-3);
+    vertical-align: 0.35em;
   }
   input {
     position: absolute;
@@ -129,13 +172,37 @@ const estados = usadas('estado', ESTADOS);
     pointer-events: none;
   }
   .contador {
-    font-size: 0.9rem;
-    margin: 1rem 0;
+    margin: 0 0 0 auto;
+    padding-bottom: 0.25rem;
   }
-  @media (max-width: 560px) {
-    legend {
-      width: 100%;
-      margin-bottom: 0.2rem;
+  .rejilla {
+    display: grid;
+    gap: var(--e-12) var(--e-8);
+  }
+  @media (min-width: 700px) {
+    .rejilla {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1100px) {
+    .rejilla {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .limpiar {
+    font: inherit;
+    color: var(--tinta);
+    background: none;
+    border: 0;
+    padding: 0;
+    text-decoration: underline;
+    text-decoration-color: var(--acento);
+    text-underline-offset: 0.22em;
+    cursor: pointer;
+  }
+  @media (max-width: 600px) {
+    .contador {
+      margin-left: 0;
     }
   }
 </style>
