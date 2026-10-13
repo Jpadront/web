@@ -10,7 +10,8 @@
     "dev": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "node --experimental-strip-types --test tests/orc.test.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.0.3",

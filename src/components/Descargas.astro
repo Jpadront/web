@@ -1,0 +1,88 @@
+---
+// Lista de archivos descargables (STL, 3MF, STEP…). Los archivos viven en public/descargas/.
+interface Props {
+  archivos: { archivo: string; nombre?: string }[];
+}
+const { archivos } = Astro.props;
+
+const extension = (ruta: string) => ruta.split('?')[0].split('.').pop()?.toUpperCase() ?? '';
+const nombreArchivo = (ruta: string) => decodeURIComponent(ruta.split('/').pop() ?? ruta);
+// Pages CMS puede guardar la ruta sin "/" inicial: la normalizamos para que funcione desde cualquier página
+const url = (ruta: string) => (/^(https?:)?\/\//.test(ruta) || ruta.startsWith('/') ? ruta : `/${ruta.replace(/^public\//, '')}`);
+---
+
+{
+  archivos.length > 0 && (
+    <section class="descargas">
+      <h2>Archivos para descargar</h2>
+      <ul>
+        {archivos.map((a) => (
+          <li>
+            <a href={url(a.archivo)} download>
+              <span class="ext">{extension(a.archivo)}</span>
+              <span class="texto">
+                <strong>{a.nombre ?? nombreArchivo(a.archivo)}</strong>
+                <span class="texto-suave">{nombreArchivo(a.archivo)}</span>
+              </span>
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 20h14" />
+              </svg>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  .descargas {
+    margin: 2.5rem 0;
+    max-width: var(--ancho-texto);
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+  a {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    color: var(--texto);
+    text-decoration: none;
+    background: var(--fondo);
+  }
+  a:hover {
+    border-color: var(--acento);
+  }
+  .ext {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 10px;
+    background: var(--marino);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .texto {
+    flex: 1;
+    display: grid;
+    min-width: 0;
+  }
+  .texto span {
+    font-size: 0.85rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+</style>

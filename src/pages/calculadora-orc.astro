@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CalculadoraOrc from '../components/CalculadoraOrc.astro';
+---
+
+<BaseLayout
+  titulo="Calculadora de tiempos ORC"
+  descripcion="Calcula en el navegador el tiempo compensado ORC por tiempo sobre distancia en función del viento y la clasificación de varios barcos."
+>
+  <div class="contenedor seccion">
+    <p class="antetitulo"><a href="/proyectos/calculo-tiempos-orc/">Proyecto: Cálculo de tiempos ORC</a></p>
+    <h1>Calculadora de tiempos ORC</h1>
+    <p class="texto-suave estrecho">
+      Introduce los barcos, su tiempo real y los coeficientes de su certificado. La clasificación se actualiza al momento. Los
+      datos de ejemplo son inventados.
+    </p>
+    <CalculadoraOrc />
+  </div>
+</BaseLayout>

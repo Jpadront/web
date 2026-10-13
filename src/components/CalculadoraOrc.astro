@@ -1,0 +1,462 @@
+---
+// Calculadora de tiempos compensados ORC (tiempo sobre distancia en función del viento).
+// Interfaz en el navegador; las fórmulas y los coeficientes están en src/lib/orc.ts.
+import { TRAMOS_TRIPLE, VIENTOS_TABLA } from '../lib/orc';
+---
+
+<section class="calc" aria-labelledby="calc-titulo" data-calc>
+  <h2 id="calc-titulo">Calculadora de tiempos ORC</h2>
+  <p class="texto-suave intro">
+    Tiempo sobre distancia: <code>Tc = Tr − C × D</code>, con el coeficiente <code>C</code> de cada barco para el viento de la
+    prueba. Los datos se guardan solo en tu navegador.
+  </p>
+
+  <noscript><p><strong>La calculadora necesita JavaScript activado.</strong></p></noscript>
+
+  <form class="ajustes" data-ajustes onsubmit="return false">
+    <label>
+      <span>Sistema</span>
+      <select name="modo">
+        <option value="tabla">Tabla por viento (interpolada)</option>
+        <option value="triple">Triple número ToD (bajo / medio / alto)</option>
+        <option value="gph">GPH (un solo coeficiente)</option>
+      </select>
+    </label>
+    <label data-solo-viento>
+      <span>Viento de la prueba (nudos)</span>
+      <input name="viento" type="number" min="0" max="40" step="0.5" inputmode="decimal" required />
+    </label>
+    <label>
+      <span>Distancia del recorrido (millas)</span>
+      <input name="distancia" type="number" min="0" step="0.01" inputmode="decimal" required />
+    </label>
+    <p class="nota" data-nota aria-live="polite"></p>
+  </form>
+
+  <h3>Barcos</h3>
+  <p class="texto-suave ayuda">
+    Tiempo real como <code>h:mm:ss</code> (o <code>mm:ss</code>). Déjalo vacío si el barco no terminó. Coeficientes en
+    segundos por milla, copiados del certificado.
+  </p>
+  <div class="barcos" data-barcos></div>
+  <p class="botones">
+    <button type="button" class="boton" data-accion="anadir">+ Añadir barco</button>
+    <button type="button" class="boton" data-accion="ejemplo">Restablecer ejemplo</button>
+    <button type="button" class="boton" data-accion="vaciar">Vaciar</button>
+  </p>
+
+  <h3>Clasificación</h3>
+  <div class="tabla-envoltorio">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col" class="num">Pos.</th>
+          <th scope="col">Barco</th>
+          <th scope="col" class="num">T. real</th>
+          <th scope="col" class="num">C (s/milla)</th>
+          <th scope="col" class="num">T. compensado</th>
+          <th scope="col" class="num">Diferencia</th>
+        </tr>
+      </thead>
+      <tbody data-resultados></tbody>
+    </table>
+  </div>
+
+  <details class="como">
+    <summary>Cómo se calcula</summary>
+    <ol>
+      <li>
+        <strong>Coeficiente C</strong> (segundos que el barco «debería» tardar en una milla):
+        <ul>
+          <li>
+            <em>Tabla por viento:</em> el certificado da C para {VIENTOS_TABLA.join(', ')} nudos. Si el viento está entre dos
+            columnas se interpola en línea recta: <code>C = C₁ + (V − V₁)/(V₂ − V₁) × (C₂ − C₁)</code>. Fuera de la tabla se usa
+            el extremo.
+          </li>
+          <li>
+            <em>Triple número:</em> bajo si V &lt; {TRAMOS_TRIPLE.bajoHasta} kn, medio hasta {TRAMOS_TRIPLE.medioHasta} kn, alto
+            por encima (revisa los límites en las Instrucciones de Regata).
+          </li>
+          <li><em>GPH:</em> un único valor para todas las condiciones.</li>
+        </ul>
+      </li>
+      <li><strong>Tiempo compensado:</strong> <code>Tc = Tr − C × D</code>.</li>
+      <li><strong>Clasificación:</strong> de menor a mayor Tc. La diferencia es con el primero.</li>
+    </ol>
+  </details>
+</section>
+
+<template id="plantilla-barco">
+  <fieldset class="barco">
+    <legend class="solo-lectores">Barco</legend>
+    <div class="fila-principal">
+      <label class="nombre"><span>Nombre</span><input data-campo="nombre" type="text" autocomplete="off" /></label>
+      <label class="tiempo"
+        ><span>Tiempo real</span><input data-campo="tiempoReal" type="text" inputmode="numeric" placeholder="h:mm:ss" autocomplete="off"
+        /></label>
+      <button type="button" class="quitar" data-accion="quitar" aria-label="Quitar barco" title="Quitar barco">×</button>
+    </div>
+    <div class="coefs" data-coefs></div>
+  </fieldset>
+</template>
+
+<script>
+  import { clasificar, EJEMPLO, formatoTiempo, tramoTriple, VIENTOS_TABLA, type Barco, type Modo, type Tramo } from '../lib/orc';
+
+  type Estado = { modo: Modo; viento: number; distancia: number; barcos: Barco[] };
+  const CLAVE = 'calculadora-orc-v1';
+  const copia = <T,>(x: T): T => structuredClone(x);
+  const TRAMOS: Tramo[] = ['bajo', 'medio', 'alto'];
+
+  // Carga lo guardado en este navegador; si no hay nada (o falla), usa el ejemplo
+  function cargar(): Estado {
+    try {
+      const guardado = JSON.parse(localStorage.getItem(CLAVE) ?? 'null');
+      if (guardado?.barcos) return guardado;
+    } catch {}
+    return copia(EJEMPLO);
+  }
+  function guardar() {
+    try {
+      localStorage.setItem(CLAVE, JSON.stringify(estado));
+    } catch {}
+  }
+
+  const barcoVacio = (): Barco => ({
+    nombre: '',
+    tiempoReal: '',
+    tabla: VIENTOS_TABLA.map(() => NaN),
+    triple: { bajo: NaN, medio: NaN, alto: NaN },
+    gph: NaN,
+  });
+
+  const raiz = document.querySelector<HTMLElement>('[data-calc]')!;
+  const ajustes = raiz.querySelector<HTMLFormElement>('[data-ajustes]')!;
+  const contBarcos = raiz.querySelector<HTMLElement>('[data-barcos]')!;
+  const tbody = raiz.querySelector<HTMLElement>('[data-resultados]')!;
+  const nota = raiz.querySelector<HTMLElement>('[data-nota]')!;
+  const plantilla = document.querySelector<HTMLTemplateElement>('#plantilla-barco')!;
+  let estado = cargar();
+
+  const num = (v: string) => (v.trim() === '' ? NaN : Number(v.replace(',', '.')));
+  const vacioSiNaN = (n: number) => (Number.isFinite(n) ? String(n) : '');
+
+  // Campos de coeficientes según el sistema elegido
+  function columnas(): { etiqueta: string; ruta: string }[] {
+    if (estado.modo === 'tabla') return VIENTOS_TABLA.map((v, i) => ({ etiqueta: `${v} kn`, ruta: `tabla.${i}` }));
+    if (estado.modo === 'triple') return TRAMOS.map((t) => ({ etiqueta: t[0].toUpperCase() + t.slice(1), ruta: `triple.${t}` }));
+    return [{ etiqueta: 'GPH', ruta: 'gph' }];
+  }
+  const leerRuta = (b: Barco, ruta: string): number => {
+    const [a, k] = ruta.split('.');
+    if (a === 'tabla') return b.tabla[Number(k)];
+    if (a === 'triple') return b.triple[k as Tramo];
+    return b.gph;
+  };
+  const escribirRuta = (b: Barco, ruta: string, valor: number) => {
+    const [a, k] = ruta.split('.');
+    if (a === 'tabla') b.tabla[Number(k)] = valor;
+    else if (a === 'triple') b.triple[k as Tramo] = valor;
+    else b.gph = valor;
+  };
+
+  // Dibuja los barcos (solo al cambiar de sistema o añadir/quitar, para no perder el foco al escribir)
+  function pintarBarcos() {
+    contBarcos.replaceChildren();
+    const cols = columnas();
+    estado.barcos.forEach((b, i) => {
+      const nodo = plantilla.content.firstElementChild!.cloneNode(true) as HTMLFieldSetElement;
+      nodo.dataset.indice = String(i);
+      nodo.querySelector('legend')!.textContent = `Barco ${i + 1}`;
+      nodo.querySelector<HTMLInputElement>('[data-campo="nombre"]')!.value = b.nombre;
+      nodo.querySelector<HTMLInputElement>('[data-campo="tiempoReal"]')!.value = b.tiempoReal;
+      const coefs = nodo.querySelector<HTMLElement>('[data-coefs]')!;
+      for (const c of cols) {
+        const label = document.createElement('label');
+        const span = document.createElement('span');
+        span.textContent = c.etiqueta;
+        const input = document.createElement('input');
+        Object.assign(input, { type: 'number', min: '0', step: '0.1', inputMode: 'decimal', value: vacioSiNaN(leerRuta(b, c.ruta)) });
+        input.dataset.coef = c.ruta;
+        label.append(span, input);
+        coefs.append(label);
+      }
+      contBarcos.append(nodo);
+    });
+  }
+
+  // Recalcula y dibuja la clasificación
+  function pintarResultados() {
+    const { modo, viento, distancia, barcos } = estado;
+    const res = clasificar(barcos, modo, viento, distancia);
+    tbody.replaceChildren(
+      ...res.map((r) => {
+        const tr = document.createElement('tr');
+        if (r.posicion === 1) tr.className = 'primero';
+        const celdas = [
+          r.posicion ? `${r.posicion}.º` : '—',
+          r.barco.nombre || '(sin nombre)',
+          r.real != null ? formatoTiempo(r.real) : 'No terminó',
+          r.coeficiente != null ? r.coeficiente.toFixed(1) : '—',
+          r.compensado != null ? formatoTiempo(r.compensado) : '—',
+          r.diferencia != null ? (r.diferencia === 0 ? '—' : formatoTiempo(r.diferencia, true)) : '',
+        ];
+        celdas.forEach((texto, i) => {
+          const td = document.createElement('td');
+          td.textContent = texto; // textContent: el nombre del barco nunca se interpreta como HTML
+          if (i !== 1) td.className = 'num';
+          tr.append(td);
+        });
+        return tr;
+      }),
+    );
+    // Aviso del tramo (triple número) y de valores que faltan
+    const avisos: string[] = [];
+    if (modo === 'triple') avisos.push(`Con ${viento} kn se usa el coeficiente «${tramoTriple(viento)}».`);
+    if (modo === 'tabla') avisos.push(`Coeficientes interpolados para ${viento} kn.`);
+    if (!(distancia > 0)) avisos.push('Indica la distancia del recorrido.');
+    nota.textContent = avisos.join(' ');
+    guardar();
+  }
+
+  function pintarAjustes() {
+    (ajustes.elements.namedItem('modo') as HTMLSelectElement).value = estado.modo;
+    (ajustes.elements.namedItem('viento') as HTMLInputElement).value = vacioSiNaN(estado.viento);
+    (ajustes.elements.namedItem('distancia') as HTMLInputElement).value = vacioSiNaN(estado.distancia);
+    raiz.querySelector<HTMLElement>('[data-solo-viento]')!.hidden = estado.modo === 'gph';
+  }
+
+  function todo() {
+    pintarAjustes();
+    pintarBarcos();
+    pintarResultados();
+  }
+
+  ajustes.addEventListener('input', (ev) => {
+    const el = ev.target as HTMLInputElement | HTMLSelectElement;
+    if (el.name === 'modo') {
+      estado.modo = el.value as Modo;
+      todo();
+      return;
+    }
+    if (el.name === 'viento') estado.viento = num(el.value);
+    if (el.name === 'distancia') estado.distancia = num(el.value);
+    pintarResultados();
+  });
+
+  contBarcos.addEventListener('input', (ev) => {
+    const el = ev.target as HTMLInputElement;
+    const i = Number(el.closest<HTMLElement>('[data-indice]')?.dataset.indice);
+    const b = estado.barcos[i];
+    if (!b) return;
+    if (el.dataset.campo === 'nombre') b.nombre = el.value;
+    else if (el.dataset.campo === 'tiempoReal') b.tiempoReal = el.value;
+    else if (el.dataset.coef) escribirRuta(b, el.dataset.coef, num(el.value));
+    pintarResultados();
+  });
+
+  raiz.addEventListener('click', (ev) => {
+    const boton = (ev.target as HTMLElement).closest<HTMLElement>('[data-accion]');
+    if (!boton) return;
+    const accion = boton.dataset.accion;
+    if (accion === 'quitar') {
+      const i = Number(boton.closest<HTMLElement>('[data-indice]')?.dataset.indice);
+      estado.barcos.splice(i, 1);
+    } else if (accion === 'anadir') {
+      estado.barcos.push(barcoVacio());
+    } else if (accion === 'ejemplo') {
+      estado = copia(EJEMPLO);
+    } else if (accion === 'vaciar') {
+      estado.barcos = [barcoVacio()];
+    }
+    todo();
+    if (accion === 'anadir') contBarcos.querySelector<HTMLInputElement>('.barco:last-child input')?.focus();
+  });
+
+  // JSON no guarda NaN (lo convierte en null): lo devolvemos a NaN al cargar
+  estado.barcos.forEach((b) => {
+    b.tabla = VIENTOS_TABLA.map((_, i) => (b.tabla?.[i] == null ? NaN : Number(b.tabla[i])));
+    for (const t of TRAMOS) b.triple[t] = b.triple?.[t] == null ? NaN : Number(b.triple[t]);
+    b.gph = b.gph == null ? NaN : Number(b.gph);
+  });
+  if (estado.viento == null) estado.viento = NaN;
+  if (estado.distancia == null) estado.distancia = NaN;
+  todo();
+</script>
+
+<style>
+  .calc {
+    margin: 2.5rem 0;
+    padding: clamp(1rem, 3vw, 1.75rem);
+    border: 1px solid var(--borde);
+    border-top: 4px solid var(--acento);
+    border-radius: var(--radio);
+    background: var(--superficie);
+  }
+  .calc h2 {
+    margin-top: 0;
+  }
+  .calc h3 {
+    margin: 1.75rem 0 0.4rem;
+  }
+  .intro,
+  .ayuda {
+    font-size: 0.95rem;
+  }
+  label {
+    display: grid;
+    min-width: 0;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--texto-suave);
+  }
+  input,
+  select {
+    font: inherit;
+    font-size: 1rem;
+    color: var(--texto);
+    background: var(--fondo);
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    padding: 0.45rem 0.6rem;
+    width: 100%;
+    min-width: 0;
+  }
+  input:focus,
+  select:focus {
+    border-color: var(--acento);
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 25%, transparent);
+  }
+  .ajustes {
+    display: grid;
+    gap: 0.9rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    margin-top: 1rem;
+  }
+  [hidden] {
+    display: none;
+  }
+  .nota {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--acento-texto);
+    font-weight: 600;
+  }
+  .barcos {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .barco {
+    margin: 0;
+    padding: 0.85rem;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    background: var(--fondo);
+    min-width: 0;
+  }
+  .fila-principal {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) auto;
+    gap: 0.6rem;
+    align-items: end;
+  }
+  .quitar {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    border: 1px solid var(--borde);
+    background: transparent;
+    color: var(--texto-suave);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .quitar:hover {
+    border-color: var(--acento);
+    color: var(--acento-texto);
+  }
+  .coefs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 4.4rem), 1fr));
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+  }
+  /* Las casillas de coeficientes se crean desde JavaScript: no llevan el atributo de
+     ámbito de Astro, así que sus estilos tienen que ser :global (limitados a .coefs) */
+  .coefs :global(label) {
+    display: grid;
+    gap: 0.2rem;
+    min-width: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--texto-suave);
+  }
+  .coefs :global(input) {
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--texto);
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: 8px;
+    width: 100%;
+    min-width: 0;
+    padding: 0.35rem 0.4rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .coefs :global(input:focus) {
+    border-color: var(--acento);
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--acento) 25%, transparent);
+  }
+  .botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.9rem 0 0;
+  }
+  .tabla-envoltorio {
+    overflow-x: auto;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    background: var(--fondo);
+  }
+  table {
+    min-width: 36rem;
+    font-variant-numeric: tabular-nums;
+  }
+  th,
+  td {
+    padding: 0.55rem 0.8rem;
+  }
+  .num {
+    text-align: right;
+    white-space: nowrap;
+  }
+  :global(tr.primero) td {
+    font-weight: 700;
+    color: var(--acento-texto);
+  }
+  .como {
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+  }
+  .como summary {
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .como ol {
+    padding-left: 1.2rem;
+  }
+  @media (max-width: 480px) {
+    .fila-principal {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .fila-principal .tiempo {
+      grid-row: 2;
+      grid-column: 1 / -1;
+    }
+  }
+</style>

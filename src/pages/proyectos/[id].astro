@@ -6,6 +6,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Etiquetas from '../../components/Etiquetas.astro';
 import TarjetaEntrada from '../../components/TarjetaEntrada.astro';
 import TablaRegatas from '../../components/TablaRegatas.astro';
+import Galeria from '../../components/Galeria.astro';
+import Descargas from '../../components/Descargas.astro';
+import CalculadoraOrc from '../../components/CalculadoraOrc.astro';
 import { CATEGORIAS, ESTADOS } from '../../lib/constantes';
 import { fechaISO, formatoMes, getEntradas, getProyectos, type Proyecto } from '../../lib/contenido';
 
@@ -87,6 +90,12 @@ const enlaces = [
     <div class="prosa">
       <Content />
     </div>
+
+    <!-- Herramienta interactiva elegida en el campo «herramienta» del proyecto -->
+    {d.herramienta === 'calculadora-orc' && <CalculadoraOrc />}
+
+    <Galeria imagenes={d.galeria} />
+    <Descargas archivos={d.descargas} />
 
     {
       relacionadas.length > 0 && (
