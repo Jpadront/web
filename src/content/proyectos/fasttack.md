@@ -1,34 +1,52 @@
 ---
 titulo: FastTack
-resumen: Análisis post-regata con los datos de Vakaros RaceSense, desarrollado con Claude Code. Para tripulaciones y entrenadores que quieren saber dónde se gana y se pierde cada prueba.
+resumen: Análisis post-regata de vela con los datos del Atlas 2 de Vakaros. Dónde ganas y dónde pierdes, tramo a tramo, frente a la flota y al top 5. Desarrollado con Claude Code.
 fecha_inicio: 2026-03-01
 estado: en-desarrollo
 categoria: software
-etiquetas: [claude-code, python, análisis de datos, j70]
-portada: ../../assets/imagenes/fasttack-portada.jpg
-portada_alt: Ilustración de un track de ceñida con viradas hasta la baliza y un gráfico de velocidad
+etiquetas: [claude-code, python, análisis de datos, j70, racesense]
+portada: ../../assets/imagenes/capturas/fasttack-pc-y-movil.jpg
+portada_alt: FastTack en el ordenador, con el análisis de una prueba, y en el móvil, con la versión en la nube
 destacado: true
 enlaces:
-  repositorio: https://github.com/jpadront/fasttack
-  demo: ""
+  repositorio: https://github.com/Jpadront/FastTack
+  demo: https://fasttack.jpadrontorrent.workers.dev/
   descarga: ""
+galeria:
+  - imagen: ../../assets/imagenes/capturas/fasttack-prueba.jpg
+    pie: Resumen de una prueba de la Winter Series (J/70) y dónde se ganó o se perdió tiempo frente al top 5, tramo a tramo
+  - imagen: ../../assets/imagenes/capturas/fasttack-mapa.jpg
+    pie: Replay de la salida en el mapa, con laylines, corriente estimada y los valores instantáneos de cada barco
+  - imagen: ../../assets/imagenes/capturas/fasttack-salida.jpg
+    pie: Viento a lo largo de la línea y comparativa de salida (margen, SOG en el disparo, primera virada, paso por la baliza 1)
+  - imagen: ../../assets/imagenes/capturas/fasttack-aceleracion.jpg
+    pie: Aceleración en la salida, de −60 s a +60 s del disparo, frente a los barcos vecinos
+  - imagen: ../../assets/imagenes/capturas/fasttack-pc.jpg
+    pie: La versión en la nube («Replay y datos»), publicada en Cloudflare
+  - imagen: ../../assets/imagenes/capturas/fasttack-movil.jpg
+    pie: La versión en la nube en el móvil
 herramienta: ninguna
 ---
 
-> **Texto provisional**: edítalo desde Pages CMS o directamente en este archivo.
+FastTack es mi herramienta de **análisis post-regata**. Lee los datos de **RaceSense**, los GPS Atlas 2 de Vakaros que llevan los barcos, y responde a la pregunta que todos nos hacemos al volver a puerto: *¿dónde se ganó y dónde se perdió la prueba?*
 
-## Qué es
+Nació para el J/70 (ESP 1214) y funciona con cualquier clase que use RaceSense; la he probado también con el Mundial de Snipe 2026.
 
-FastTack carga un campeonato de **RaceSense** (dispositivos Vakaros Atlas 2), reconstruye las pruebas y analiza cada una: salida, velocidad y VMG frente a los barcos vecinos, maniobras, táctica, laylines y un barco fantasma que muestra el camino más corto de baliza a baliza.
+## Qué hace
 
-## Para quién
+- **Recorrido y viento reconstruidos** con los GPS de toda la flota: pruebas, balizas, roladas y presión, aunque RaceSense no los publique.
+- **Tramo a tramo**: velocidad, VMG, maniobras, táctica y escora, frente a los barcos vecinos y frente al top 5.
+- **Salidas**: posición en la línea, margen y velocidad en el disparo, viento a lo largo de la línea y aceleración de −60 s a +60 s.
+- **Replay** en el mapa con capas de presión, dirección del viento, amura favorecida, línea del líder y un barco fantasma.
+- **Debrief e informe PDF** para la tripulación, con cifras que se comprueban una a una.
 
-Para la tripulación y su entrenador: la idea es tener, al volver a puerto, una lista clara de **dónde se perdió la prueba** frente al top 5 y qué se puede entrenar.
+Todo lo que depende del viento reconstruido va marcado como **estimado**: prefiero una cifra honesta a una bonita.
 
-## Estado actual
+## Dos versiones
 
-Primera versión completa y validada con campeonatos de J/70 y el Mundial de Snipe. [Cuenta aquí en qué estás trabajando ahora.]
+- **La aplicación completa** (la de las capturas del análisis) funciona en mi ordenador y la abro desde el móvil o la comparto con el equipo cuando hace falta.
+- **La versión en la nube** («Replay y datos») está publicada en Cloudflare: importa una jornada de RaceSense, la guarda en el navegador y permite hacer copias en Dropbox para pasarlas entre dispositivos. Necesita una clave de acceso, así que el enlace es más una muestra que una demo abierta.
 
 ## Cómo está hecho
 
-Python para el cálculo, una web ligera para verlo y [Claude Code](https://claude.ai/code) como compañero de desarrollo. [Cuenta aquí qué te ha funcionado y qué no al programar con IA.]
+Python para el cálculo, una web ligera para verlo y [Claude Code](https://claude.ai/code) como compañero de desarrollo: el código, las fórmulas y su validación están documentados en el [repositorio](https://github.com/Jpadront/FastTack).

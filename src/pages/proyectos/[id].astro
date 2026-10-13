@@ -35,7 +35,7 @@ const regatas = relacionadas.filter((e) => e.data.regata.nombre);
 
 const enlaces = [
   d.enlaces.repositorio && { href: d.enlaces.repositorio, texto: 'Repositorio' },
-  d.enlaces.demo && { href: d.enlaces.demo, texto: 'Demo' },
+  d.enlaces.demo && { href: d.enlaces.demo, texto: /^https?:\/\//.test(d.enlaces.demo) ? 'Abrir la app' : 'Ver demo' },
   d.enlaces.descarga && { href: d.enlaces.descarga, texto: 'Descarga' },
 ].filter(Boolean) as { href: string; texto: string }[];
 const externo = (href: string) => /^https?:\/\//.test(href);

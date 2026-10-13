@@ -30,3 +30,5 @@ tiempo compensado = tiempo real − (segundos por milla × millas del recorrido)
 Lo que cambia con el viento es el coeficiente: un barco ligero gana mucho con poco viento y un barco pesado aprovecha mejor el viento fuerte. Por eso los certificados ORC dan una tabla de coeficientes para 6, 8, 10, 12, 14, 16 y 20 nudos, y la calculadora **interpola** entre ellos según el viento que elija el comité.
 
 La calculadora está más abajo. Los datos de ejemplo son inventados: sustitúyelos por los de los certificados de tu flota.
+
+Para una regata concreta uso una versión hecha a medida, con los ratings reales de la flota y pensada para el móvil: está en el [Diario de regatas](/proyectos/diario-de-regatas/).
