@@ -1,17 +1,22 @@
 ---
-titulo: Cálculo de tiempos ORC
-resumen: Herramientas para el tiempo compensado ORC. La calculadora de a bordo del Macaco, con los ratings reales de la flota, y una calculadora general de tiempo sobre distancia en función del viento.
+titulo: Calculadora de tiempo compensado ORC
+resumen: Esta calculadora se creó para el X37 Macaco, con los ratings reales de
+  la flota en el trofeo Princesa de Asturias 2026, y es un calculadora general
+  de tiempo sobre distancia en función del viento.
 fecha_inicio: 2026-05-01
 estado: en-desarrollo
 categoria: vela
-etiquetas: [orc, calculadora, compensación, macaco]
+etiquetas:
+  - orc
+  - calculadora
+  - compensación
+  - macaco
 portada: ../../assets/imagenes/capturas/macaco-pc-y-movil.jpg
-portada_alt: La calculadora del Macaco en el ordenador y en el móvil, con la diferencia de rating frente a cada barco de la flota
+portada_alt: La calculadora del Macaco en el ordenador y en el móvil, con la
+  diferencia de rating frente a cada barco de la flota
 destacado: true
 enlaces:
-  repositorio: ""
   demo: https://macaco.jpadrontorrent.workers.dev/
-  descarga: ""
 galeria:
   - imagen: ../../assets/imagenes/capturas/macaco-pc.jpg
     pie: Referencias de la flota a 12 nudos, del barco más rápido al más lento
@@ -22,8 +27,8 @@ galeria:
   - imagen: ../../assets/imagenes/capturas/macaco-movil-claro.jpg
     pie: Versión clara, con el control de viento y los grupos de la flota
 herramienta: calculadora-orc
+borrador: false
 ---
-
 En ORC no gana quien llega primero, sino quien tiene el menor **tiempo compensado**. Este proyecto reúne las herramientas que uso para calcularlo.
 
 ## La calculadora de a bordo del Macaco
