@@ -666,3 +666,85 @@ a.chip:hover {
     color: #555;
   }
 }
+
+/* ---------- Efectos dinámicos (ver src/scripts/efectos.ts) ---------- */
+
+/* Aparición al hacer scroll. Solo si hay JS (clase .js) y no se pide reducir movimiento. */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-revelar]:not([data-revelar='grupo']),
+  .js [data-revelar='grupo'] > * {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 700ms cubic-bezier(0.2, 0, 0, 1),
+      transform 700ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .js [data-revelar].visible:not([data-revelar='grupo']),
+  .js [data-revelar='grupo'].visible > * {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Foco de luz que sigue al cursor (las coordenadas las pone el script) */
+[data-foco] {
+  --mx: 50%;
+  --my: 50%;
+}
+[data-foco]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 300ms;
+  background: radial-gradient(420px circle at var(--mx) var(--my), color-mix(in srgb, var(--acento) 14%, transparent), transparent 45%);
+}
+[data-foco]:hover::before {
+  opacity: 1;
+}
+
+/* Cursor parpadeante del texto que se escribe solo */
+[data-escribir]::after {
+  content: '';
+  display: inline-block;
+  width: 0.08em;
+  height: 0.9em;
+  margin-left: 0.06em;
+  vertical-align: -0.08em;
+  background: var(--acento);
+  animation: parpadeo 1s steps(1) infinite;
+}
+@keyframes parpadeo {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Barra de progreso de lectura (solo CSS, en los navegadores que admiten scroll-timeline) */
+.progreso-lectura {
+  display: none;
+}
+@supports (animation-timeline: scroll()) {
+  .progreso-lectura {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    height: 2px;
+    background: linear-gradient(90deg, var(--acento), #ffb37a);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    animation: progreso linear both;
+    animation-timeline: scroll(root);
+  }
+  @keyframes progreso {
+    to {
+      transform: scaleX(1);
+    }
+  }
+}

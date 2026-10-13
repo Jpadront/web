@@ -42,6 +42,7 @@ const externo = (href: string) => /^https?:\/\//.test(href);
 ---
 
 <BaseLayout titulo={d.titulo} descripcion={d.resumen} imagen={d.portada} tipo="article" fecha={d.fecha_inicio}>
+  <div class="progreso-lectura" aria-hidden="true"></div>
   <article class="contenedor seccion">
     <header class="cabecera-proyecto">
       <div class="titulo">

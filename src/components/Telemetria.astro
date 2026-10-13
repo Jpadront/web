@@ -1,0 +1,234 @@
+---
+// Panel de «telemetría» de la portada. Es una SIMULACIÓN (lo indica el propio panel):
+// valores que varían suavemente, como los de un GPS de regata, para dar vida a la página.
+// Sin JavaScript o con «reducir movimiento» se muestran los valores iniciales, quietos.
+interface Props {
+  enlace?: string;
+}
+const { enlace = '/proyectos/fasttack/' } = Astro.props;
+---
+
+<aside class="telemetria" aria-label="Telemetría simulada" data-telemetria>
+  <header>
+    <span class="en-vivo"><span class="punto" aria-hidden="true"></span>Telemetría</span>
+    <span class="etiqueta">Simulación</span>
+  </header>
+
+  <div class="cuerpo">
+    <svg class="compas" viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="54" class="aro"></circle>
+      <g class="marcas">
+        {
+          Array.from({ length: 36 }, (_, i) => (
+            <line x1="60" y1={i % 9 === 0 ? 8 : 10} x2="60" y2={i % 9 === 0 ? 17 : 14} transform={`rotate(${i * 10} 60 60)`} />
+          ))
+        }
+      </g>
+      <text x="60" y="28" class="norte">N</text>
+      <g class="aguja" data-aguja>
+        <path d="M60 22 L66 60 L60 54 L54 60 Z" class="punta"></path>
+        <path d="M60 98 L64 60 L60 66 L56 60 Z" class="cola"></path>
+      </g>
+      <circle cx="60" cy="60" r="3.5" class="eje"></circle>
+    </svg>
+
+    <dl class="valores">
+      <div><dt>TWS</dt><dd><span data-valor="tws">11,8</span><small>kn</small></dd></div>
+      <div><dt>TWD</dt><dd><span data-valor="twd">248</span><small>°</small></dd></div>
+      <div><dt>SOG</dt><dd><span data-valor="sog">6,42</span><small>kn</small></dd></div>
+      <div><dt>VMG</dt><dd><span data-valor="vmg">4,95</span><small>kn</small></dd></div>
+    </dl>
+  </div>
+
+  <svg class="grafica" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="relleno-sog" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="var(--acento)" stop-opacity=".35"></stop>
+        <stop offset="1" stop-color="var(--acento)" stop-opacity="0"></stop>
+      </linearGradient>
+    </defs>
+    <path data-area fill="url(#relleno-sog)"></path>
+    <polyline data-linea fill="none" stroke="var(--acento)" stroke-width="2" vector-effect="non-scaling-stroke"></polyline>
+  </svg>
+  <footer>
+    <span class="etiqueta">SOG · 60 s</span>
+    <a href={enlace} class="etiqueta">Ver FastTack →</a>
+  </footer>
+</aside>
+
+<script>
+  const fmt = (n: number, d: number) => n.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+  for (const panel of document.querySelectorAll<HTMLElement>('[data-telemetria]')) {
+    const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const el = (k: string) => panel.querySelector<HTMLElement>(`[data-valor="${k}"]`)!;
+    const aguja = panel.querySelector<SVGGElement>('[data-aguja]')!;
+    const linea = panel.querySelector<SVGPolylineElement>('[data-linea]')!;
+    const area = panel.querySelector<SVGPathElement>('[data-area]')!;
+
+    // Paseo aleatorio suave, con «muelle» hacia un valor medio (como un viento real)
+    const estado = { tws: 11.8, twd: 248, sog: 6.42 };
+    const media = { tws: 12, twd: 250, sog: 6.4 };
+    const historia: number[] = Array.from({ length: 60 }, (_, i) => 6.4 + Math.sin(i / 6) * 0.25);
+    let angulo = 248;
+
+    function pintar() {
+      el('tws').textContent = fmt(estado.tws, 1);
+      el('twd').textContent = String(Math.round(((estado.twd % 360) + 360) % 360)).padStart(3, '0');
+      el('sog').textContent = fmt(estado.sog, 2);
+      // VMG en ceñida con un ángulo al viento de unos 40°
+      el('vmg').textContent = fmt(estado.sog * Math.cos((40 * Math.PI) / 180), 2);
+      aguja.style.transform = `rotate(${angulo}deg)`;
+      const min = Math.min(...historia) - 0.15;
+      const max = Math.max(...historia) + 0.15;
+      const pts = historia.map((v, i) => `${(i / (historia.length - 1)) * 300},${56 - ((v - min) / (max - min)) * 50}`);
+      linea.setAttribute('points', pts.join(' '));
+      area.setAttribute('d', `M0,60 L${pts.join(' L')} L300,60 Z`);
+    }
+
+    function avanzar() {
+      const ruido = () => (Math.random() - 0.5) * 2;
+      estado.tws += (media.tws - estado.tws) * 0.05 + ruido() * 0.35;
+      estado.twd += (media.twd - estado.twd) * 0.04 + ruido() * 2.2;
+      estado.sog += (media.sog + (estado.tws - 12) * 0.12 - estado.sog) * 0.12 + ruido() * 0.08;
+      // La aguja gira siempre por el camino más corto
+      angulo += ((((estado.twd - angulo) % 360) + 540) % 360) - 180;
+      historia.push(estado.sog);
+      historia.shift();
+      pintar();
+    }
+
+    pintar();
+    if (!quieto) {
+      let id: number | undefined;
+      // Solo se actualiza cuando el panel está a la vista
+      new IntersectionObserver(([e]) => {
+        clearInterval(id);
+        if (e.isIntersecting) id = window.setInterval(avanzar, 900);
+      }).observe(panel);
+    }
+  }
+</script>
+
+<style>
+  .telemetria {
+    position: relative;
+    display: grid;
+    gap: var(--e-3);
+    padding: var(--e-4) var(--e-4) var(--e-3);
+    border-radius: var(--radio);
+    color: #e8edf5;
+    background: rgb(10 20 38 / 0.62);
+    border: 1px solid rgb(141 169 196 / 0.22);
+    backdrop-filter: blur(14px) saturate(1.3);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    box-shadow:
+      0 30px 60px -20px rgb(0 0 0 / 0.6),
+      inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+  header,
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--e-3);
+  }
+  .etiqueta {
+    color: #7d8ea8;
+  }
+  footer a:hover {
+    color: #ff9457;
+  }
+  .en-vivo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #e8edf5;
+  }
+  .punto {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: #ff7a33;
+    animation: latido 2s ease-out infinite;
+  }
+  .cuerpo {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: var(--e-4);
+    align-items: center;
+  }
+  .compas {
+    width: 100%;
+    height: auto;
+  }
+  .aro {
+    fill: rgb(255 255 255 / 0.03);
+    stroke: rgb(141 169 196 / 0.35);
+    stroke-width: 1;
+  }
+  .marcas line {
+    stroke: rgb(141 169 196 / 0.55);
+    stroke-width: 1;
+  }
+  .norte {
+    font-family: var(--mono);
+    font-size: 9px;
+    fill: #7d8ea8;
+    text-anchor: middle;
+  }
+  .aguja {
+    transform-origin: 60px 60px;
+    transform-box: view-box;
+    transition: transform 900ms cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+  .punta {
+    fill: #ff7a33;
+  }
+  .cola {
+    fill: rgb(232 237 245 / 0.5);
+  }
+  .eje {
+    fill: #e8edf5;
+  }
+  .valores {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--e-3) var(--e-4);
+    margin: 0;
+  }
+  dt {
+    font-family: var(--mono);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    color: #7d8ea8;
+  }
+  dd {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 1.35rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  small {
+    margin-left: 0.2em;
+    font-size: 0.6em;
+    color: #7d8ea8;
+  }
+  .grafica {
+    width: 100%;
+    height: 3.5rem;
+    border-top: 1px dashed rgb(141 169 196 / 0.2);
+    padding-top: var(--e-2);
+  }
+  polyline,
+  path {
+    transition: all 900ms linear;
+  }
+</style>

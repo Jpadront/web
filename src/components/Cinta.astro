@@ -1,0 +1,67 @@
+---
+// Cinta que se desplaza sin fin con las tecnologías y temas de los proyectos.
+// Solo CSS: la lista se duplica para que el bucle no tenga saltos. Se detiene al pasar
+// el ratón y con «reducir movimiento».
+interface Props {
+  elementos: string[];
+}
+const { elementos } = Astro.props;
+---
+
+<div class="cinta" aria-label="Tecnologías y temas">
+  <ul>
+    {elementos.map((e) => <li>{e}</li>)}
+  </ul>
+  <ul aria-hidden="true">
+    {elementos.map((e) => <li>{e}</li>)}
+  </ul>
+</div>
+
+<style>
+  .cinta {
+    display: flex;
+    overflow: hidden;
+    padding-block: var(--e-4);
+    border-block: 1px solid var(--linea);
+    background: var(--superficie);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  ul {
+    display: flex;
+    flex: none;
+    gap: var(--e-12);
+    margin: 0;
+    padding: 0 var(--e-12) 0 0;
+    list-style: none;
+    animation: desplazar 40s linear infinite;
+  }
+  .cinta:hover ul {
+    animation-play-state: paused;
+  }
+  li {
+    display: flex;
+    align-items: center;
+    gap: var(--e-12);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--tinta-2);
+    white-space: nowrap;
+  }
+  /* Separador: un pequeño rombo naranja */
+  li::after {
+    content: '';
+    width: 0.4rem;
+    height: 0.4rem;
+    background: var(--acento);
+    transform: rotate(45deg);
+    opacity: 0.8;
+  }
+  @keyframes desplazar {
+    to {
+      transform: translateX(-100%);
+    }
+  }
+</style>

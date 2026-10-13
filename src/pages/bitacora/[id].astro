@@ -29,6 +29,7 @@ const minutos = minutosLectura(entrada.body);
 ---
 
 <BaseLayout titulo={d.titulo} descripcion={d.resumen} imagen={d.portada} tipo="article" fecha={d.fecha}>
+  <div class="progreso-lectura" aria-hidden="true"></div>
   <article class="contenedor seccion">
     <header class="cabecera-entrada">
       <p class="etiqueta">

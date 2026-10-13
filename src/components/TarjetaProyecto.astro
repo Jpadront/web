@@ -14,7 +14,7 @@ const { proyecto, numero, prioridad = false } = Astro.props;
 const d = proyecto.data;
 ---
 
-<article class="tarjeta" data-categoria={d.categoria} data-estado={d.estado}>
+<article class="tarjeta" data-foco data-categoria={d.categoria} data-estado={d.estado}>
   <div class="imagen">
     {
       d.portada ? (

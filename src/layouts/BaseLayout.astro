@@ -31,6 +31,8 @@ const { descripcion = sitio.descripcion, rejilla = true, ...resto } = Astro.prop
         const t = localStorage.getItem('tema');
         if (t === 'claro' || t === 'oscuro') document.documentElement.dataset.tema = t;
       } catch {}
+      // Marca que hay JavaScript: solo entonces se ocultan los elementos que aparecen al hacer scroll
+      document.documentElement.classList.add('js');
     </script>
     <!-- Fuentes precargadas: se ven nada más abrir la página -->
     <Font cssVariable="--fuente-texto" preload={[{ style: 'normal' }]} />
@@ -51,6 +53,9 @@ const { descripcion = sitio.descripcion, rejilla = true, ...resto } = Astro.prop
       <slot />
     </main>
     <Pie />
+    <script>
+      import '../scripts/efectos';
+    </script>
   </body>
 </html>
 

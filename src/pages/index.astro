@@ -3,8 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import TarjetaProyecto from '../components/TarjetaProyecto.astro';
 import TarjetaEntrada from '../components/TarjetaEntrada.astro';
 import RedesSociales from '../components/RedesSociales.astro';
+import CampoViento from '../components/CampoViento.astro';
+import Telemetria from '../components/Telemetria.astro';
+import Cinta from '../components/Cinta.astro';
 import { sitio } from '../lib/sitio';
-import { dosCifras, fechaISO, formatoFechaCorta, getEntradas, getProyectos } from '../lib/contenido';
+import { dosCifras, getEntradas, getProyectos } from '../lib/contenido';
 
 const proyectos = await getProyectos();
 // Destacados: los marcados como «destacado»; si no hay ninguno, los más recientes
@@ -12,7 +15,6 @@ const marcados = proyectos.filter((p) => p.data.destacado);
 const destacados = (marcados.length ? marcados : proyectos).slice(0, 4);
 const entradas = await getEntradas();
 const ultimas = entradas.slice(0, 4);
-const regatas = entradas.filter((e) => e.data.regata.nombre).length;
 
 // «Ahora»: el texto de sitio.json o, si está vacío, el proyecto en desarrollo con la entrada más reciente
 const enDesarrollo = proyectos.filter((p) => p.data.estado === 'en-desarrollo');
@@ -22,18 +24,25 @@ const ahora = sitio.ahora
   ? { texto: sitio.ahora, href: '/bitacora/' }
   : actual && { texto: `Trabajando en ${actual.data.titulo}`, href: `/proyectos/${actual.id}/` };
 
-// Pequeño índice en cifras junto a la presentación (se actualiza solo)
-const indice = [
-  { k: 'Proyectos', v: dosCifras(proyectos.length), href: '/proyectos/' },
-  { k: 'Entradas', v: dosCifras(entradas.length), href: '/bitacora/' },
-  { k: 'Regatas', v: dosCifras(regatas), href: '/proyectos/diario-de-regatas/' },
+// Cifras de la portada (se calculan solas al publicar)
+const publicadas = proyectos.filter((p) => /^https?:\/\//.test(p.data.enlaces.demo ?? '')).length;
+const cifras = [
+  { n: proyectos.length, k: 'proyectos' },
+  { n: publicadas, k: 'apps publicadas' },
+  { n: entradas.length, k: 'entradas' },
 ];
+
+// Lo que se escribe solo en el titular
+const frases = ['herramientas de análisis', 'apps para navegar', 'calculadoras de regata', 'piezas en 3D'];
+
+// Cinta: tecnologías y temas con los que trabajo
+const cinta = ['Claude Code', 'Astro', 'Python', 'TypeScript', 'Cloudflare Workers', 'three.js', 'RaceSense · Vakaros', 'ORC', 'Impresión 3D', 'Dropbox API', 'Apps sin conexión'];
 ---
 
 <BaseLayout titulo={sitio.titulo} rejilla={false}>
-  <section class="portada fondo-rejilla">
-    <div class="halo" aria-hidden="true"></div>
-    <div class="contenedor rejilla-portada">
+  <section class="hero" data-hero>
+    <CampoViento />
+    <div class="contenedor rejilla-hero">
       <div class="texto">
         {
           ahora && (
@@ -41,105 +50,108 @@ const indice = [
               <span class="estado estado-en-desarrollo" />
               <span class="etiqueta">Ahora</span>
               <span class="ahora-texto">{ahora.texto}</span>
-              <span class="flecha" aria-hidden="true">→</span>
+              <span class="flecha" aria-hidden="true">
+                →
+              </span>
             </a>
           )
         }
         <h1>{sitio.nombre}</h1>
+        <p class="construyo">
+          Construyo <span class="palabra" data-escribir={JSON.stringify(frases)}>{frases[0]}</span>
+        </p>
         <p class="entradilla">{sitio.presentacion}</p>
         <div class="acciones">
           <a class="boton boton-primario" href="/proyectos/">Ver proyectos <span class="flecha" aria-hidden="true">→</span></a>
-          <a class="boton" href="/bitacora/">Leer la bitácora</a>
-          <RedesSociales />
+          <a class="boton boton-cristal" href="/bitacora/">Leer la bitácora</a>
         </div>
-      </div>
-
-      <aside class="indice" aria-label="Índice">
-        <dl>
+        <ul class="cifras">
           {
-            indice.map((i) => (
-              <div>
-                <dt class="etiqueta">{i.k}</dt>
-                <dd>
-                  <a href={i.href}>{i.v}</a>
-                </dd>
-              </div>
+            cifras.map((c) => (
+              <li>
+                <strong data-contar={c.n}>{dosCifras(c.n)}</strong>
+                <span>{c.k}</span>
+              </li>
             ))
           }
-          {
-            entradas[0] && (
-              <div>
-                <dt class="etiqueta">Última entrada</dt>
-                <dd class="fecha">
-                  <a href={`/bitacora/${entradas[0].id}/`}>
-                    <time datetime={fechaISO(entradas[0].data.fecha)}>{formatoFechaCorta(entradas[0].data.fecha)}</time>
-                  </a>
-                </dd>
-              </div>
-            )
-          }
-        </dl>
-      </aside>
+          <li class="redes-hero"><RedesSociales /></li>
+        </ul>
+      </div>
+      <div class="lateral">
+        <Telemetria />
+      </div>
     </div>
+    <a class="bajar" href="#proyectos" aria-label="Ir a los proyectos"><span></span></a>
   </section>
 
-  <section class="contenedor seccion">
-    <div class="cabecera-seccion">
+  <Cinta elementos={cinta} />
+
+  <section class="contenedor seccion" id="proyectos">
+    <div class="cabecera-seccion" data-revelar>
       <div>
         <p class="etiqueta">Proyectos</p>
         <h2>Lo que estoy construyendo</h2>
       </div>
       <a class="enlace-flecha" href="/proyectos/">Ver todos</a>
     </div>
-    <div class="rejilla-proyectos">
+    <div class="rejilla-proyectos" data-revelar="grupo">
       {destacados.map((p, i) => <TarjetaProyecto proyecto={p} numero={i + 1} prioridad={i < 2} />)}
     </div>
   </section>
 
   <section class="contenedor seccion">
-    <div class="cabecera-seccion">
+    <div class="cabecera-seccion" data-revelar>
       <div>
         <p class="etiqueta">Bitácora</p>
         <h2>Últimas entradas</h2>
       </div>
       <a class="enlace-flecha" href="/bitacora/">Ver todas</a>
     </div>
-    <div class="lista-entradas">
+    <div class="lista-entradas" data-revelar="grupo">
       {ultimas.length ? ultimas.map((e) => <TarjetaEntrada entrada={e} />) : <p class="texto-suave">Todavía no hay entradas.</p>}
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  .portada {
+  /* El hero es siempre oscuro (también en modo claro): es el «escenario» del campo de viento */
+  .hero {
+    --hero-fondo: #070d18;
+    position: relative;
+    isolation: isolate;
     overflow: hidden;
-    border-bottom: 1px solid var(--linea);
-  }
-  /* Halo de color muy suave detrás del titular */
-  .halo {
-    position: absolute;
-    inset: -30% -10% auto auto;
-    width: min(60rem, 90vw);
-    aspect-ratio: 1;
-    z-index: -1;
+    color: #e8edf5;
     background:
-      radial-gradient(closest-side, color-mix(in srgb, var(--acento) 16%, transparent), transparent 70%),
-      radial-gradient(closest-side at 30% 70%, color-mix(in srgb, var(--azul) 12%, transparent), transparent 70%);
-    filter: blur(20px);
-    pointer-events: none;
+      radial-gradient(70rem 40rem at 85% 0%, rgb(242 100 25 / 0.22), transparent 60%),
+      radial-gradient(60rem 40rem at 0% 100%, rgb(59 130 246 / 0.2), transparent 60%),
+      linear-gradient(180deg, #0a1a33, var(--hero-fondo));
   }
-  .rejilla-portada {
+  /* Rejilla de puntos sobre el fondo, muy tenue */
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image: radial-gradient(rgb(232 237 245 / 0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(180deg, #000 40%, transparent);
+    -webkit-mask-image: linear-gradient(180deg, #000 40%, transparent);
+  }
+  .rejilla-hero {
+    position: relative;
+    z-index: 1;
     display: grid;
     gap: var(--e-12);
-    padding-block: clamp(var(--e-12), 9vw, 8rem) clamp(var(--e-12), 7vw, 6rem);
+    min-height: min(52rem, calc(100svh - 3.75rem));
+    align-items: center;
+    padding-block: clamp(var(--e-12), 8vw, 7rem) clamp(var(--e-16), 8vw, 7rem);
   }
-  @media (min-width: 960px) {
-    .rejilla-portada {
-      grid-template-columns: minmax(0, 1fr) 19rem;
-      align-items: end;
+  @media (min-width: 1000px) {
+    .rejilla-hero {
+      grid-template-columns: minmax(0, 1fr) 22rem;
     }
   }
-  /* Pastilla «Ahora» */
   .ahora {
     display: inline-flex;
     align-items: center;
@@ -148,23 +160,23 @@ const indice = [
     margin-bottom: var(--e-6);
     padding: 0.35rem 0.85rem 0.35rem 0.7rem;
     border-radius: 999px;
-    border: 1px solid var(--linea);
-    background: color-mix(in srgb, var(--fondo) 75%, transparent);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgb(141 169 196 / 0.25);
+    background: rgb(255 255 255 / 0.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     font-size: 0.88rem;
-    color: var(--tinta);
+    color: #e8edf5;
     text-decoration: none;
-    box-shadow: var(--sombra);
     transition: border-color var(--transicion);
   }
   .ahora:hover {
-    color: var(--tinta);
-    border-color: color-mix(in srgb, var(--acento) 50%, var(--linea));
+    color: #fff;
+    border-color: rgb(255 122 51 / 0.6);
   }
   .ahora .etiqueta {
+    color: #8fa1ba;
     padding-right: 0.6rem;
-    border-right: 1px solid var(--linea);
+    border-right: 1px solid rgb(141 169 196 / 0.25);
   }
   .ahora-texto {
     overflow: hidden;
@@ -172,80 +184,131 @@ const indice = [
     white-space: nowrap;
   }
   .ahora .flecha {
-    color: var(--tinta-3);
+    color: #8fa1ba;
     transition: transform var(--transicion);
   }
   .ahora:hover .flecha {
     transform: translateX(3px);
-    color: var(--acento-texto);
+    color: #ff9457;
   }
   h1 {
-    margin: 0 0 var(--e-6);
-    /* Degradado sutil en el titular: de la tinta a un tono algo más claro */
-    background: linear-gradient(180deg, var(--tinta) 30%, color-mix(in srgb, var(--tinta) 65%, var(--fondo)));
+    margin: 0 0 var(--e-4);
+    font-size: clamp(3rem, 1.8rem + 5.5vw, 6rem);
+    letter-spacing: -0.055em;
+    line-height: 0.98;
+    color: transparent;
+    background: linear-gradient(180deg, #ffffff 20%, #9fb3cc);
     -webkit-background-clip: text;
     background-clip: text;
-    color: transparent;
     padding-bottom: 0.06em;
   }
+  .construyo {
+    margin: 0 0 var(--e-6);
+    font-size: clamp(1.3rem, 1rem + 1.4vw, 2rem);
+    font-weight: 550;
+    letter-spacing: -0.03em;
+    color: #c5d2e3;
+    min-height: 1.3em;
+  }
+  .palabra {
+    color: #ff8a3d;
+  }
   .entradilla {
+    color: #a1afc3;
     margin-bottom: var(--e-8);
   }
   .acciones {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
     gap: var(--e-3);
   }
-  .acciones :global(.redes) {
-    margin-left: var(--e-2);
+  .boton-cristal {
+    color: #e8edf5;
+    background: rgb(255 255 255 / 0.06);
+    border-color: rgb(141 169 196 / 0.3);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
-  /* Índice en cifras como una tarjeta de 2×2 */
-  .indice dl {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    margin: 0;
-    border: 1px solid var(--linea);
-    border-radius: var(--radio);
-    background: color-mix(in srgb, var(--fondo) 80%, transparent);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    box-shadow: var(--sombra);
-    overflow: hidden;
+  .boton-cristal:hover {
+    color: #fff;
+    border-color: rgb(232 237 245 / 0.6);
   }
-  .indice dl > div {
-    padding: var(--e-4) var(--e-4) var(--e-3);
+  .cifras {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-4) var(--e-8);
+    margin: var(--e-12) 0 0;
+    padding: var(--e-6) 0 0;
+    list-style: none;
+    border-top: 1px solid rgb(141 169 196 / 0.18);
   }
-  .indice dl > div:nth-child(odd) {
-    border-right: 1px solid var(--linea);
+  .cifras li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
   }
-  .indice dl > div:nth-child(-n + 2) {
-    border-bottom: 1px solid var(--linea);
-  }
-  dd {
-    margin: var(--e-1) 0 0;
-    font-size: 2.1rem;
-    font-weight: 620;
-    letter-spacing: -0.05em;
-    line-height: 1.1;
-    font-variant-numeric: tabular-nums;
-  }
-  dd.fecha {
+  .cifras strong {
     font-family: var(--mono);
-    font-size: 0.95rem;
+    font-size: 1.6rem;
     font-weight: 500;
-    letter-spacing: 0;
-    padding-top: 0.55rem;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
   }
-  dd a {
-    color: var(--tinta);
-    text-decoration: none;
+  .cifras span {
+    font-size: 0.85rem;
+    color: #8fa1ba;
   }
-  dd a:hover {
-    color: var(--acento-texto);
+  .redes-hero {
+    margin-left: auto;
   }
-  .cabecera-seccion .etiqueta {
-    margin: 0 0 var(--e-2);
+  .redes-hero :global(a) {
+    color: #a1afc3;
+  }
+  .redes-hero :global(a:hover) {
+    color: #fff;
+    background: rgb(255 255 255 / 0.08);
+  }
+  /* Indicador animado para bajar */
+  .bajar {
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    bottom: var(--e-6);
+    width: 1.5rem;
+    height: 2.3rem;
+    margin-left: -0.75rem;
+    border: 1.5px solid rgb(141 169 196 / 0.45);
+    border-radius: 999px;
+  }
+  .bajar span {
+    position: absolute;
+    left: 50%;
+    top: 0.4rem;
+    width: 3px;
+    height: 0.45rem;
+    margin-left: -1.5px;
+    border-radius: 2px;
+    background: #ff8a3d;
+    animation: rueda 1.8s ease-in-out infinite;
+  }
+  @keyframes rueda {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    70% {
+      transform: translateY(0.75rem);
+      opacity: 0;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+  @media (max-width: 999px) {
+    .bajar {
+      display: none;
+    }
   }
   .rejilla-proyectos {
     display: grid;
@@ -255,6 +318,9 @@ const indice = [
     .rejilla-proyectos {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+  }
+  .cabecera-seccion .etiqueta {
+    margin: 0 0 var(--e-2);
   }
   .lista-entradas {
     max-width: 54rem;

@@ -13,7 +13,7 @@ const ruta = Astro.url.pathname;
 const activo = (href: string) => ruta.startsWith(href);
 ---
 
-<header class="cabecera">
+<header class:list={["cabecera", { "sobre-hero": ruta === "/" }]} data-cabecera>
   <div class="contenedor fila">
     <a class="marca" href="/" aria-label={`${sitio.nombre}, inicio`}>
       <Gallardete />
@@ -36,6 +36,17 @@ const activo = (href: string) => ruta.startsWith(href);
   </div>
 </header>
 
+<script>
+  // En la portada, la cabecera es oscura mientras está sobre el hero y vuelve a su color al bajar
+  const cab = document.querySelector<HTMLElement>('[data-cabecera]');
+  const hero = document.querySelector('[data-hero]');
+  if (cab && hero) {
+    new IntersectionObserver(([e]) => cab.classList.toggle('sobre-hero', e.isIntersecting), {
+      rootMargin: '-64px 0px 0px 0px',
+    }).observe(hero);
+  } else cab?.classList.remove('sobre-hero');
+</script>
+
 <style>
   .cabecera {
     position: sticky;
@@ -45,6 +56,39 @@ const activo = (href: string) => ruta.startsWith(href);
     backdrop-filter: saturate(1.4) blur(12px);
     -webkit-backdrop-filter: saturate(1.4) blur(12px);
     border-bottom: 1px solid var(--linea);
+  }
+  /* Sobre el hero oscuro de la portada */
+  .cabecera {
+    transition:
+      background-color 300ms,
+      border-color 300ms;
+  }
+  .sobre-hero {
+    background: rgb(10 26 51 / 0.97);
+    border-bottom-color: rgb(141 169 196 / 0.14);
+  }
+  .sobre-hero .marca,
+  .sobre-hero nav a[aria-current='page'],
+  .sobre-hero nav a:hover {
+    color: #fff;
+  }
+  .sobre-hero nav a {
+    color: #a1afc3;
+  }
+  .sobre-hero nav a:hover,
+  .sobre-hero nav a[aria-current='page'] {
+    background: rgb(255 255 255 / 0.08);
+    box-shadow: none;
+  }
+  .sobre-hero :global(.boton-tema) {
+    color: #a1afc3;
+  }
+  .sobre-hero :global(.boton-tema:hover) {
+    background: rgb(255 255 255 / 0.08);
+    color: #fff;
+  }
+  .sobre-hero :global(.gallardete) {
+    color: #fff;
   }
   .fila {
     display: flex;

@@ -1,0 +1,137 @@
+---
+// Fondo animado de la portada: un «campo de viento» de partículas que siguen líneas de
+// corriente, como las que FastTack reconstruye con los GPS de la flota.
+// - Canvas 2D sin librerías; se pausa cuando no está en pantalla o la pestaña está oculta.
+// - El ratón (o el dedo) crea un remolino alrededor del cursor.
+// - Con «reducir movimiento» activado en el sistema se dibuja un único fotograma estático.
+---
+
+<canvas class="campo-viento" aria-hidden="true" data-campo-viento></canvas>
+
+<script>
+  type Particula = { x: number; y: number; px: number; py: number; vida: number; naranja: boolean };
+
+  for (const canvas of document.querySelectorAll<HTMLCanvasElement>('[data-campo-viento]')) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) continue;
+    const quieto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let ancho = 0;
+    let alto = 0;
+    let particulas: Particula[] = [];
+    let t = 0;
+    let activo = true;
+    let raton = { x: -9999, y: -9999, fuerza: 0 };
+
+    // Dirección del viento en cada punto: un viento medio del oeste con roladas suaves
+    // que cambian con el tiempo (suma de senos: barato y sin «ruido» aleatorio).
+    const angulo = (x: number, y: number) =>
+      -0.25 +
+      0.55 * Math.sin(x * 0.0021 + t * 0.35) +
+      0.45 * Math.cos(y * 0.0034 - t * 0.27) +
+      0.25 * Math.sin((x + y) * 0.0013 + t * 0.18);
+
+    const nueva = (alAzar = true): Particula => {
+      const x = alAzar ? Math.random() * ancho : -10;
+      const y = Math.random() * alto;
+      return { x, y, px: x, py: y, vida: 60 + Math.random() * 220, naranja: Math.random() < 0.07 };
+    };
+
+    function medir() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const r = canvas.getBoundingClientRect();
+      ancho = r.width;
+      alto = r.height;
+      canvas.width = Math.round(ancho * dpr);
+      canvas.height = Math.round(alto * dpr);
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // Densidad proporcional al área, con un máximo para móviles modestos
+      const n = Math.min(900, Math.round((ancho * alto) / 1400));
+      particulas = Array.from({ length: n }, () => nueva());
+    }
+
+    function paso() {
+      t += 0.016;
+      // Desvanece el fotograma anterior: deja las estelas
+      ctx!.globalCompositeOperation = 'destination-out';
+      ctx!.fillStyle = 'rgba(0,0,0,0.085)';
+      ctx!.fillRect(0, 0, ancho, alto);
+      ctx!.globalCompositeOperation = 'source-over';
+      raton.fuerza *= 0.96;
+
+      ctx!.lineWidth = 1.1;
+      for (const p of particulas) {
+        let a = angulo(p.x, p.y);
+        let v = 1.15;
+        // Remolino alrededor del cursor: gira el vector y acelera cerca del centro
+        const dx = p.x - raton.x;
+        const dy = p.y - raton.y;
+        const d2 = dx * dx + dy * dy;
+        if (raton.fuerza > 0.01 && d2 < 160 * 160) {
+          const k = (1 - Math.sqrt(d2) / 160) * raton.fuerza;
+          a += k * 1.6;
+          v += k * 2.2;
+        }
+        p.px = p.x;
+        p.py = p.y;
+        p.x += Math.cos(a) * v;
+        p.y += Math.sin(a) * v;
+        p.vida--;
+        if (p.vida <= 0 || p.x < -20 || p.x > ancho + 20 || p.y < -20 || p.y > alto + 20) {
+          Object.assign(p, nueva(p.x > ancho + 20 ? false : true));
+          continue;
+        }
+        ctx!.strokeStyle = p.naranja ? 'rgba(255,122,51,0.85)' : 'rgba(170,196,226,0.42)';
+        ctx!.beginPath();
+        ctx!.moveTo(p.px, p.py);
+        ctx!.lineTo(p.x, p.y);
+        ctx!.stroke();
+      }
+    }
+
+    function bucle() {
+      if (!activo) return;
+      paso();
+      requestAnimationFrame(bucle);
+    }
+
+    medir();
+    if (quieto) {
+      // Un fotograma «congelado» con estelas largas, sin animación
+      for (let i = 0; i < 90; i++) paso();
+    } else {
+      // Solo se anima mientras se ve: ahorra batería al hacer scroll o cambiar de pestaña
+      new IntersectionObserver(([e]) => {
+        const antes = activo;
+        activo = e.isIntersecting && !document.hidden;
+        if (activo && !antes) requestAnimationFrame(bucle);
+      }).observe(canvas);
+      document.addEventListener('visibilitychange', () => {
+        const antes = activo;
+        activo = !document.hidden;
+        if (activo && !antes) requestAnimationFrame(bucle);
+      });
+      const zona = canvas.parentElement ?? canvas;
+      zona.addEventListener('pointermove', (ev) => {
+        const r = canvas.getBoundingClientRect();
+        raton = { x: ev.clientX - r.left, y: ev.clientY - r.top, fuerza: 1 };
+      });
+      requestAnimationFrame(bucle);
+    }
+    let espera: number | undefined;
+    window.addEventListener('resize', () => {
+      clearTimeout(espera);
+      espera = window.setTimeout(medir, 150);
+    });
+  }
+</script>
+
+<style>
+  .campo-viento {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+</style>
