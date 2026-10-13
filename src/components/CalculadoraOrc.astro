@@ -299,9 +299,9 @@ const { conTitulo = true } = Astro.props;
     margin: var(--e-12) 0;
     padding: clamp(var(--e-4), 3vw, var(--e-8));
     border: 1px solid var(--linea);
-    border-top: 2px solid var(--tinta);
-    border-radius: 0 0 var(--radio) var(--radio);
+    border-radius: var(--radio);
     background: var(--superficie);
+    box-shadow: var(--sombra);
   }
   .cabecera-calc h2 {
     margin: var(--e-2) 0 var(--e-4);
@@ -348,7 +348,7 @@ const { conTitulo = true } = Astro.props;
     background: var(--fondo);
     border: 1px solid var(--linea-fuerte);
     border-radius: var(--radio-pequeno);
-    padding: 0.5rem 0.65rem;
+    padding: 0.55rem 0.7rem;
     width: 100%;
     min-width: 0;
     transition:
@@ -403,7 +403,7 @@ const { conTitulo = true } = Astro.props;
   .quitar {
     width: 2.35rem;
     height: 2.35rem;
-    border-radius: var(--radio-pequeno);
+    border-radius: 50%;
     border: 1px solid transparent;
     background: transparent;
     color: var(--tinta-3);

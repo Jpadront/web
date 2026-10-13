@@ -191,10 +191,8 @@ tests/orc.test.ts          Pruebas de las fórmulas ORC
 ### Diseño
 
 - **Colores, medidas y espaciado**: variables al principio de `src/styles/global.css` (`--fondo`, `--tinta`, `--acento`…) y su versión para el modo oscuro justo debajo.
-- **Tipografías** (autoalojadas, sin Google Fonts; se configuran en `astro.config.mjs`):
-  - *Newsreader* para títulos y entradillas,
-  - *Inter* para el texto,
-  - *JetBrains Mono* para fechas, etiquetas y cifras.
+- **Tipografías** (autoalojadas, sin Google Fonts; se configuran en `astro.config.mjs`): *Geist* para títulos y texto, *Geist Mono* para fechas, etiquetas, cifras y código.
+- **Portada**: la pastilla **«Ahora»** muestra el campo *Ahora* de «Datos de la web y contacto» (Pages CMS); si está vacío, enlaza al proyecto en desarrollo con la entrada más reciente.
 - **Marca**: el gallardete de la cabecera está en `src/components/Gallardete.astro`; el favicon, en `public/favicon.svg` (cambia de color solo en modo oscuro).
 - **Ilustraciones**: las portadas de ejemplo son dibujos tipo carta náutica en `src/assets/imagenes/`. Se pueden sustituir por fotos con el mismo nombre o subir otras desde Pages CMS. Formato ideal: horizontal, 16:10, 1600 px de ancho o más.
 - **Pie de página**: dice «Sin cookies ni analítica», y hoy es cierto: el modo claro/oscuro y la calculadora guardan sus datos en el navegador, sin cookies. Si algún día activas Cloudflare Web Analytics u otra herramienta, cambia ese texto en `src/components/Pie.astro`.

@@ -305,6 +305,10 @@ content:
         label: Presentación (portada)
         type: text
         required: true
+      - name: ahora
+        label: Ahora (en qué estás trabajando)
+        description: "Frase corta que aparece en la portada, p. ej. «Preparando la temporada ORC y puliendo FastTack». Si la dejas vacía, se muestra el último proyecto en desarrollo."
+        type: string
       - name: url
         label: URL pública de la web
         description: "Con https:// y sin barra final, p. ej. https://tudominio.com. Se usa en el sitemap, el RSS y al compartir."

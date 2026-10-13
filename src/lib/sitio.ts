@@ -11,6 +11,8 @@ const esquema = z.object({
   titulo: texto(),
   descripcion: texto(),
   presentacion: texto(),
+  // «Ahora»: en qué estás trabajando (opcional; si está vacío se usa el último proyecto en desarrollo)
+  ahora: texto(),
   url: texto('https://example.com'),
   idioma: texto('es-ES'),
   contacto: z

@@ -14,8 +14,10 @@ interface Props {
   tipo?: 'website' | 'article';
   fecha?: Date;
   noIndexar?: boolean;
+  /** Rejilla de puntos decorativa en la parte superior (la portada lleva la suya propia) */
+  rejilla?: boolean;
 }
-const { descripcion = sitio.descripcion, ...resto } = Astro.props;
+const { descripcion = sitio.descripcion, rejilla = true, ...resto } = Astro.props;
 ---
 
 <!doctype html>
@@ -30,12 +32,11 @@ const { descripcion = sitio.descripcion, ...resto } = Astro.props;
         if (t === 'claro' || t === 'oscuro') document.documentElement.dataset.tema = t;
       } catch {}
     </script>
-    <!-- Solo se precargan las dos fuentes que se ven nada más abrir la página -->
-    <Font cssVariable="--fuente-titulos" preload={[{ style: 'normal' }]} />
+    <!-- Fuentes precargadas: se ven nada más abrir la página -->
     <Font cssVariable="--fuente-texto" preload={[{ style: 'normal' }]} />
-    <Font cssVariable="--fuente-mono" />
-    <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
+    <Font cssVariable="--fuente-mono" preload />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#070d18" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title={`${sitio.nombre} · Bitácora`} href="/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
@@ -46,7 +47,7 @@ const { descripcion = sitio.descripcion, ...resto } = Astro.props;
   <body>
     <a class="saltar solo-lectores" href="#contenido">Saltar al contenido</a>
     <Cabecera />
-    <main id="contenido">
+    <main id="contenido" class:list={{ "rejilla-superior": rejilla }}>
       <slot />
     </main>
     <Pie />

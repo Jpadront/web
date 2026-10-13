@@ -119,9 +119,11 @@ const estados = usadas('estado', ESTADOS);
     flex-wrap: wrap;
     align-items: flex-end;
     gap: var(--e-4) var(--e-12);
-    padding: var(--e-4) 0;
+    padding: var(--e-4) var(--e-6);
     margin-bottom: var(--e-12);
-    border-block: 1px solid var(--linea);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    background: var(--superficie);
   }
   fieldset {
     border: 0;
@@ -136,23 +138,36 @@ const estados = usadas('estado', ESTADOS);
   .opciones {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--e-1) var(--e-4);
+    gap: var(--e-2);
   }
-  /* Opciones como texto; la elegida, en tinta y subrayada en naranja */
+  /* Opciones como pastillas; la elegida, en marino (o claro en modo oscuro) */
   label {
     position: relative;
     cursor: pointer;
-    padding-block: 0.2rem;
-    font-size: 0.93rem;
+    padding: 0.32rem 0.8rem;
+    border-radius: 999px;
+    border: 1px solid var(--linea);
+    background: var(--fondo);
+    font-size: 0.9rem;
+    font-weight: 500;
     color: var(--tinta-2);
-    transition: color var(--transicion);
+    transition:
+      color var(--transicion),
+      border-color var(--transicion),
+      background-color var(--transicion);
   }
   label:hover {
     color: var(--tinta);
+    border-color: var(--linea-fuerte);
   }
   label:has(input:checked) {
-    color: var(--tinta);
-    box-shadow: inset 0 -1.5px 0 var(--acento);
+    color: var(--fondo);
+    background: var(--tinta);
+    border-color: var(--tinta);
+  }
+  label:has(input:checked) .n {
+    color: inherit;
+    opacity: 0.6;
   }
   label:has(input:focus-visible) {
     outline: 2px solid var(--acento);
@@ -164,7 +179,7 @@ const estados = usadas('estado', ESTADOS);
     font-family: var(--mono);
     font-size: 0.68rem;
     color: var(--tinta-3);
-    vertical-align: 0.35em;
+    vertical-align: 0.1em;
   }
   input {
     position: absolute;
@@ -177,7 +192,7 @@ const estados = usadas('estado', ESTADOS);
   }
   .rejilla {
     display: grid;
-    gap: var(--e-12) var(--e-8);
+    gap: var(--e-6);
   }
   @media (min-width: 700px) {
     .rejilla {

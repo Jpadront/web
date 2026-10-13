@@ -14,6 +14,14 @@ const entradas = await getEntradas();
 const ultimas = entradas.slice(0, 4);
 const regatas = entradas.filter((e) => e.data.regata.nombre).length;
 
+// «Ahora»: el texto de sitio.json o, si está vacío, el proyecto en desarrollo con la entrada más reciente
+const enDesarrollo = proyectos.filter((p) => p.data.estado === 'en-desarrollo');
+const conActividad = entradas.map((e) => enDesarrollo.find((p) => p.id === e.data.proyecto?.id)).find(Boolean);
+const actual = conActividad ?? enDesarrollo[0];
+const ahora = sitio.ahora
+  ? { texto: sitio.ahora, href: '/bitacora/' }
+  : actual && { texto: `Trabajando en ${actual.data.titulo}`, href: `/proyectos/${actual.id}/` };
+
 // Pequeño índice en cifras junto a la presentación (se actualiza solo)
 const indice = [
   { k: 'Proyectos', v: dosCifras(proyectos.length), href: '/proyectos/' },
@@ -22,50 +30,66 @@ const indice = [
 ];
 ---
 
-<BaseLayout titulo={sitio.titulo}>
-  <section class="contenedor portada">
-    <div class="texto">
-      <p class="etiqueta">Cuaderno de proyectos</p>
-      <h1>{sitio.nombre}</h1>
-      <p class="entradilla">{sitio.presentacion}</p>
-      <div class="acciones">
-        <a class="enlace-flecha" href="/proyectos/">Ver los proyectos</a>
-        <a class="enlace-flecha" href="/bitacora/">Leer la bitácora</a>
-      </div>
-    </div>
-    <aside class="indice" aria-label="Índice">
-      <dl>
+<BaseLayout titulo={sitio.titulo} rejilla={false}>
+  <section class="portada fondo-rejilla">
+    <div class="halo" aria-hidden="true"></div>
+    <div class="contenedor rejilla-portada">
+      <div class="texto">
         {
-          indice.map((i) => (
-            <div>
-              <dt class="etiqueta">{i.k}</dt>
-              <dd>
-                <a href={i.href}>{i.v}</a>
-              </dd>
-            </div>
-          ))
-        }
-        {
-          entradas[0] && (
-            <div class="ultima">
-              <dt class="etiqueta">Última entrada</dt>
-              <dd class="mono">
-                <a href={`/bitacora/${entradas[0].id}/`}>
-                  <time datetime={fechaISO(entradas[0].data.fecha)}>{formatoFechaCorta(entradas[0].data.fecha)}</time>
-                </a>
-              </dd>
-            </div>
+          ahora && (
+            <a class="ahora" href={ahora.href}>
+              <span class="estado estado-en-desarrollo" />
+              <span class="etiqueta">Ahora</span>
+              <span class="ahora-texto">{ahora.texto}</span>
+              <span class="flecha" aria-hidden="true">→</span>
+            </a>
           )
         }
-      </dl>
-      <RedesSociales />
-    </aside>
+        <h1>{sitio.nombre}</h1>
+        <p class="entradilla">{sitio.presentacion}</p>
+        <div class="acciones">
+          <a class="boton boton-primario" href="/proyectos/">Ver proyectos <span class="flecha" aria-hidden="true">→</span></a>
+          <a class="boton" href="/bitacora/">Leer la bitácora</a>
+          <RedesSociales />
+        </div>
+      </div>
+
+      <aside class="indice" aria-label="Índice">
+        <dl>
+          {
+            indice.map((i) => (
+              <div>
+                <dt class="etiqueta">{i.k}</dt>
+                <dd>
+                  <a href={i.href}>{i.v}</a>
+                </dd>
+              </div>
+            ))
+          }
+          {
+            entradas[0] && (
+              <div>
+                <dt class="etiqueta">Última entrada</dt>
+                <dd class="fecha">
+                  <a href={`/bitacora/${entradas[0].id}/`}>
+                    <time datetime={fechaISO(entradas[0].data.fecha)}>{formatoFechaCorta(entradas[0].data.fecha)}</time>
+                  </a>
+                </dd>
+              </div>
+            )
+          }
+        </dl>
+      </aside>
+    </div>
   </section>
 
   <section class="contenedor seccion">
     <div class="cabecera-seccion">
-      <h2>Proyectos</h2>
-      <a class="enlace-flecha" href="/proyectos/">Todos</a>
+      <div>
+        <p class="etiqueta">Proyectos</p>
+        <h2>Lo que estoy construyendo</h2>
+      </div>
+      <a class="enlace-flecha" href="/proyectos/">Ver todos</a>
     </div>
     <div class="rejilla-proyectos">
       {destacados.map((p, i) => <TarjetaProyecto proyecto={p} numero={i + 1} prioridad={i < 2} />)}
@@ -74,8 +98,11 @@ const indice = [
 
   <section class="contenedor seccion">
     <div class="cabecera-seccion">
-      <h2>Bitácora</h2>
-      <a class="enlace-flecha" href="/bitacora/">Todas las entradas</a>
+      <div>
+        <p class="etiqueta">Bitácora</p>
+        <h2>Últimas entradas</h2>
+      </div>
+      <a class="enlace-flecha" href="/bitacora/">Ver todas</a>
     </div>
     <div class="lista-entradas">
       {ultimas.length ? ultimas.map((e) => <TarjetaEntrada entrada={e} />) : <p class="texto-suave">Todavía no hay entradas.</p>}
@@ -85,18 +112,81 @@ const indice = [
 
 <style>
   .portada {
+    overflow: hidden;
+    border-bottom: 1px solid var(--linea);
+  }
+  /* Halo de color muy suave detrás del titular */
+  .halo {
+    position: absolute;
+    inset: -30% -10% auto auto;
+    width: min(60rem, 90vw);
+    aspect-ratio: 1;
+    z-index: -1;
+    background:
+      radial-gradient(closest-side, color-mix(in srgb, var(--acento) 16%, transparent), transparent 70%),
+      radial-gradient(closest-side at 30% 70%, color-mix(in srgb, var(--azul) 12%, transparent), transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+  .rejilla-portada {
     display: grid;
     gap: var(--e-12);
-    padding-block: clamp(var(--e-12), 9vw, 8.5rem) clamp(var(--e-8), 4vw, var(--e-12));
+    padding-block: clamp(var(--e-12), 9vw, 8rem) clamp(var(--e-12), 7vw, 6rem);
   }
-  @media (min-width: 900px) {
-    .portada {
-      grid-template-columns: minmax(0, 1fr) 16rem;
+  @media (min-width: 960px) {
+    .rejilla-portada {
+      grid-template-columns: minmax(0, 1fr) 19rem;
       align-items: end;
     }
   }
+  /* Pastilla «Ahora» */
+  .ahora {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 100%;
+    margin-bottom: var(--e-6);
+    padding: 0.35rem 0.85rem 0.35rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--linea);
+    background: color-mix(in srgb, var(--fondo) 75%, transparent);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    font-size: 0.88rem;
+    color: var(--tinta);
+    text-decoration: none;
+    box-shadow: var(--sombra);
+    transition: border-color var(--transicion);
+  }
+  .ahora:hover {
+    color: var(--tinta);
+    border-color: color-mix(in srgb, var(--acento) 50%, var(--linea));
+  }
+  .ahora .etiqueta {
+    padding-right: 0.6rem;
+    border-right: 1px solid var(--linea);
+  }
+  .ahora-texto {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ahora .flecha {
+    color: var(--tinta-3);
+    transition: transform var(--transicion);
+  }
+  .ahora:hover .flecha {
+    transform: translateX(3px);
+    color: var(--acento-texto);
+  }
   h1 {
-    margin: var(--e-4) 0 var(--e-6);
+    margin: 0 0 var(--e-6);
+    /* Degradado sutil en el titular: de la tinta a un tono algo más claro */
+    background: linear-gradient(180deg, var(--tinta) 30%, color-mix(in srgb, var(--tinta) 65%, var(--fondo)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    padding-bottom: 0.06em;
   }
   .entradilla {
     margin-bottom: var(--e-8);
@@ -104,35 +194,48 @@ const indice = [
   .acciones {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--e-3) var(--e-8);
+    align-items: center;
+    gap: var(--e-3);
   }
+  .acciones :global(.redes) {
+    margin-left: var(--e-2);
+  }
+  /* Índice en cifras como una tarjeta de 2×2 */
   .indice dl {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin: 0 0 var(--e-6);
-    border-top: 1px solid var(--linea);
+    grid-template-columns: 1fr 1fr;
+    margin: 0;
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    background: color-mix(in srgb, var(--fondo) 80%, transparent);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: var(--sombra);
+    overflow: hidden;
   }
   .indice dl > div {
-    padding: var(--e-3) 0;
+    padding: var(--e-4) var(--e-4) var(--e-3);
+  }
+  .indice dl > div:nth-child(odd) {
+    border-right: 1px solid var(--linea);
+  }
+  .indice dl > div:nth-child(-n + 2) {
     border-bottom: 1px solid var(--linea);
   }
-  .indice dl > div {
-    padding-right: var(--e-3);
-  }
-  .ultima {
-    grid-column: 1 / -1;
-  }
   dd {
-    margin: 0;
-    font-family: var(--titulos);
-    font-size: 2rem;
-    line-height: 1.2;
-    font-variant-numeric: tabular-nums lining-nums;
+    margin: var(--e-1) 0 0;
+    font-size: 2.1rem;
+    font-weight: 620;
+    letter-spacing: -0.05em;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
   }
-  dd.mono {
+  dd.fecha {
     font-family: var(--mono);
     font-size: 0.95rem;
-    padding-top: 0.2rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    padding-top: 0.55rem;
   }
   dd a {
     color: var(--tinta);
@@ -141,9 +244,12 @@ const indice = [
   dd a:hover {
     color: var(--acento-texto);
   }
+  .cabecera-seccion .etiqueta {
+    margin: 0 0 var(--e-2);
+  }
   .rejilla-proyectos {
     display: grid;
-    gap: var(--e-12) var(--e-8);
+    gap: var(--e-6);
   }
   @media (min-width: 700px) {
     .rejilla-proyectos {
@@ -151,6 +257,6 @@ const indice = [
     }
   }
   .lista-entradas {
-    max-width: 52rem;
+    max-width: 54rem;
   }
 </style>

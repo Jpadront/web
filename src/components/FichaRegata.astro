@@ -55,8 +55,10 @@ const datos = [
     grid-template-columns: minmax(0, 1fr);
     max-width: 52rem;
     margin: 0 0 var(--e-12);
-    border-top: 1px solid var(--tinta);
-    border-bottom: 1px solid var(--linea);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+    background: var(--superficie);
+    overflow: hidden;
   }
   @media (min-width: 640px) {
     .ficha {
@@ -67,8 +69,9 @@ const datos = [
     display: grid;
     align-content: start;
     gap: var(--e-1);
-    padding: var(--e-4) var(--e-6) var(--e-4) 0;
+    padding: var(--e-4) var(--e-6);
     border-bottom: 1px solid var(--linea);
+    background: var(--fondo);
   }
   @media (min-width: 640px) {
     .posicion {
@@ -78,8 +81,9 @@ const datos = [
     }
   }
   .cifra {
-    font-family: var(--titulos);
     font-size: 4rem;
+    font-weight: 650;
+    letter-spacing: -0.05em;
     line-height: 1;
     color: var(--acento-texto);
     font-variant-numeric: lining-nums;
@@ -95,7 +99,7 @@ const datos = [
     margin: 0;
   }
   dl > div {
-    padding: var(--e-4) var(--e-4) var(--e-4) 0;
+    padding: var(--e-4) var(--e-4) var(--e-4) var(--e-6);
   }
   @media (min-width: 640px) {
     dl > div {
@@ -111,7 +115,7 @@ const datos = [
     display: grid;
     gap: var(--e-1);
     margin: 0;
-    padding: var(--e-4) 0;
+    padding: var(--e-4) var(--e-6);
     border-top: 1px solid var(--linea);
     font-size: 0.95rem;
     color: var(--tinta-2);
