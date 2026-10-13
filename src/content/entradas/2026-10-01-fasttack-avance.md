@@ -2,7 +2,7 @@
 titulo: "FastTack: avance de ejemplo"
 fecha: 2026-10-01
 resumen: Entrada de ejemplo vinculada al proyecto FastTack para contar un avance.
-proyecto: fasttack
+proyecto: src/content/proyectos/fasttack.md
 etiquetas: [claude-code, avance]
 ---
 

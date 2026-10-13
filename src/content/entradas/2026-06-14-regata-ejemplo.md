@@ -2,7 +2,7 @@
 titulo: "Regata de ejemplo: primera del calendario"
 fecha: 2026-06-14
 resumen: Otra crónica de ejemplo para ver cómo se ve la serie del Diario de regatas.
-proyecto: diario-de-regatas
+proyecto: src/content/proyectos/diario-de-regatas.md
 etiquetas: [crónica, orc]
 regata:
   nombre: Regata de Ejemplo

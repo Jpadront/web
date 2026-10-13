@@ -2,7 +2,7 @@
 titulo: "Trofeo de ejemplo: viento rolón y una buena remontada"
 fecha: 2026-09-21
 resumen: Crónica de ejemplo con los datos de regata rellenos. Sustitúyela por tu primera crónica real.
-proyecto: diario-de-regatas
+proyecto: src/content/proyectos/diario-de-regatas.md
 etiquetas: [crónica, orc, táctica]
 portada: ../../assets/imagenes/regata-ejemplo.jpg
 portada_alt: Ilustración de un velero

@@ -2,7 +2,7 @@
 titulo: Primera pieza para el barco
 fecha: 2026-08-02
 resumen: Entrada de ejemplo del proyecto de impresiones 3D.
-proyecto: impresiones-3d
+proyecto: src/content/proyectos/impresiones-3d.md
 etiquetas: [impresión 3d, barco]
 ---
 

@@ -2,7 +2,7 @@
 titulo: Cómo se compensa en ORC (tiempo sobre distancia)
 fecha: 2026-07-10
 resumen: Por qué el coeficiente cambia con el viento y cómo se interpola entre los valores del certificado.
-proyecto: calculo-tiempos-orc
+proyecto: src/content/proyectos/calculo-tiempos-orc.md
 etiquetas: [orc, compensación, explicación]
 ---
 

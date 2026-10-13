@@ -1,0 +1,343 @@
+# Configuración de Pages CMS (https://pagescms.org): editor de contenidos en el navegador.
+# Cada cambio que guardes en Pages CMS es un commit en GitHub; Cloudflare Pages lo
+# detecta y vuelve a publicar la web en uno o dos minutos.
+#
+# Si añades una categoría, un estado o una herramienta nueva, añádela también en
+# src/lib/constantes.ts (el esquema de Astro solo acepta esos valores).
+
+media:
+  # Imágenes: van a src/assets/imagenes para que Astro las optimice (WebP, tamaños
+  # adaptados al móvil…). En el Markdown se guardan con ruta relativa al archivo.
+  - name: imagenes
+    label: Imágenes
+    input: src/assets/imagenes
+    output: ../../assets/imagenes
+    categories: [image]
+  # Archivos descargables (STL, 3MF…): se publican tal cual en /descargas/
+  - name: descargas
+    label: Descargas (STL, 3MF…)
+    input: public/descargas
+    output: /descargas
+    extensions: [stl, 3mf, step, stp, obj, f3d, scad, zip, pdf, gcode]
+
+content:
+  # ───────────────────────── Proyectos ─────────────────────────
+  - name: proyectos
+    label: Proyectos
+    type: collection
+    path: src/content/proyectos
+    filename: "{primary}.md"
+    view:
+      primary: titulo
+      fields: [titulo, estado, categoria, fecha_inicio, destacado]
+      sort: [fecha_inicio, titulo]
+      default:
+        sort: fecha_inicio
+        order: desc
+    fields:
+      - name: titulo
+        label: Título
+        type: string
+        required: true
+      - name: resumen
+        label: Resumen corto
+        description: Una o dos frases (máx. 240 caracteres). Se usa en las tarjetas y como descripción para buscadores y redes.
+        type: text
+        required: true
+        options:
+          maxlength: 240
+      - name: fecha_inicio
+        label: Fecha de inicio
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: estado
+        label: Estado
+        type: select
+        required: true
+        options:
+          values:
+            - { name: idea, label: Idea }
+            - { name: en-desarrollo, label: En desarrollo }
+            - { name: terminado, label: Terminado }
+            - { name: pausado, label: Pausado }
+      - name: categoria
+        label: Categoría
+        type: select
+        required: true
+        options:
+          values:
+            - { name: software, label: Software }
+            - { name: vela, label: Vela }
+            - { name: 3d, label: Impresión 3D }
+            - { name: otros, label: Otros }
+      - name: etiquetas
+        label: Etiquetas
+        type: string
+        list: true
+      - name: portada
+        label: Imagen de portada
+        description: Horizontal, idealmente 1600×900 o mayor.
+        type: image
+        options:
+          media: imagenes
+      - name: portada_alt
+        label: Texto alternativo de la portada
+        description: Describe la imagen para quien no la ve (accesibilidad y SEO).
+        type: string
+      - name: destacado
+        label: Destacado en la portada
+        type: boolean
+        default: false
+      - name: enlaces
+        label: Enlaces
+        type: object
+        fields:
+          - name: repositorio
+            label: Repositorio
+            type: string
+          - name: demo
+            label: Demo
+            type: string
+          - name: descarga
+            label: Descarga
+            type: string
+      - name: galeria
+        label: Galería de imágenes
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{pie}"
+        fields:
+          - name: imagen
+            label: Imagen
+            type: image
+            required: true
+            options:
+              media: imagenes
+          - name: pie
+            label: Pie de foto
+            type: string
+      - name: descargas
+        label: Archivos descargables
+        type: object
+        list:
+          collapsible:
+            collapsed: true
+            summary: "{nombre}"
+        fields:
+          - name: archivo
+            label: Archivo (STL, 3MF…)
+            type: file
+            required: true
+            options:
+              media: descargas
+          - name: nombre
+            label: Nombre visible
+            type: string
+      - name: herramienta
+        label: Herramienta interactiva
+        description: Incrusta una herramienta al final del texto del proyecto.
+        type: select
+        default: ninguna
+        options:
+          values:
+            - { name: ninguna, label: Ninguna }
+            - { name: calculadora-orc, label: Calculadora de tiempos ORC }
+      - name: borrador
+        label: Borrador (no se publica)
+        type: boolean
+        default: false
+      - name: body
+        label: Texto
+        type: rich-text
+        options:
+          format: markdown
+          media: imagenes
+
+  # ───────────────────── Entradas (bitácora) ─────────────────────
+  - name: entradas
+    label: Bitácora
+    type: collection
+    path: src/content/entradas
+    # La fecha delante del nombre ordena los archivos y evita choques de nombres
+    filename:
+      template: "{year}-{month}-{day}-{primary}.md"
+      field: create
+    view:
+      primary: titulo
+      fields: [titulo, fecha, proyecto]
+      sort: [fecha, titulo]
+      default:
+        sort: fecha
+        order: desc
+    fields:
+      - name: titulo
+        label: Título
+        type: string
+        required: true
+      - name: fecha
+        label: Fecha
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: resumen
+        label: Resumen
+        description: Una o dos frases. Se usa en los listados, el RSS y al compartir en redes.
+        type: text
+        required: true
+      - name: proyecto
+        label: Proyecto
+        description: Opcional. La entrada aparecerá al final de la página de ese proyecto.
+        type: reference
+        options:
+          collection: proyectos
+          search: titulo
+          value: "{path}"
+          label: "{titulo}"
+      - name: etiquetas
+        label: Etiquetas
+        type: string
+        list: true
+      - name: portada
+        label: Imagen de portada
+        type: image
+        options:
+          media: imagenes
+      - name: portada_alt
+        label: Texto alternativo de la portada
+        type: string
+      - name: regata
+        label: Datos de regata (solo para el Diario de regatas)
+        description: Rellena al menos el nombre de la regata para que se muestre la ficha y entre en la tabla de resultados.
+        type: object
+        fields:
+          - name: nombre
+            label: Regata
+            type: string
+          - name: lugar
+            label: Lugar / club
+            type: string
+          - name: barco
+            label: Barco
+            type: string
+            default: Macaco
+          - name: clase
+            label: Clase / grupo
+            type: string
+          - name: posicion
+            label: Posición final
+            type: number
+          - name: participantes
+            label: Barcos en la clase
+            type: number
+          - name: pruebas
+            label: Pruebas disputadas
+            type: number
+          - name: viento
+            label: Viento
+            type: string
+          - name: notas
+            label: Notas
+            type: text
+      - name: borrador
+        label: Borrador (no se publica)
+        type: boolean
+        default: false
+      - name: body
+        label: Texto
+        type: rich-text
+        options:
+          format: markdown
+          media: imagenes
+
+  # ───────────────────────── Sobre mí ─────────────────────────
+  - name: sobre-mi
+    label: Sobre mí
+    type: file
+    path: src/content/paginas/sobre-mi.md
+    fields:
+      - name: titulo
+        label: Título
+        type: string
+        required: true
+      - name: descripcion
+        label: Descripción (buscadores y redes)
+        type: text
+        required: true
+      - name: foto
+        label: Foto
+        type: image
+        options:
+          media: imagenes
+      - name: foto_alt
+        label: Texto alternativo de la foto
+        type: string
+      - name: body
+        label: Texto
+        type: rich-text
+        options:
+          format: markdown
+          media: imagenes
+
+  # ─────────────────── Datos generales de la web ───────────────────
+  - name: sitio
+    label: Datos de la web y contacto
+    type: file
+    path: src/data/sitio.json
+    fields:
+      - name: nombre
+        label: Tu nombre
+        type: string
+        required: true
+      - name: titulo
+        label: Título de la web (pestaña del navegador en la portada)
+        type: string
+        required: true
+      - name: descripcion
+        label: Descripción de la web (buscadores y redes)
+        type: text
+        required: true
+      - name: presentacion
+        label: Presentación (portada)
+        type: text
+        required: true
+      - name: url
+        label: URL pública de la web
+        description: "Con https:// y sin barra final, p. ej. https://tudominio.com. Se usa en el sitemap, el RSS y al compartir."
+        type: string
+        required: true
+      - name: idioma
+        label: Idioma
+        type: string
+        hidden: true
+      - name: contacto
+        label: Contacto
+        type: object
+        fields:
+          - name: email
+            label: Email
+            type: string
+          - name: github
+            label: GitHub (URL)
+            type: string
+          - name: instagram
+            label: Instagram (URL)
+            type: string
+          - name: linkedin
+            label: LinkedIn (URL)
+            type: string
+      - name: otras_redes
+        label: Otras redes
+        type: object
+        list: true
+        fields:
+          - name: nombre
+            label: Nombre
+            type: string
+          - name: url
+            label: URL
+            type: string
